@@ -38,7 +38,7 @@ Create the base directory and required files.
 ---
 
 ### Task P1.2 — Implement Build & Dev Toolchain
-**Status:** ⏳ Pending | **Difficulty:** Medium | **Blocker for:** P1.1 (production assets), P2.4
+**Status:** ✅ Done | **Difficulty:** Medium | **Blocker for:** P1.1 (production assets), P2.4
 
 Set up the build process to handle Hot Module Replacement (HMR) and bundle the extension correctly.
 
