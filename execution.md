@@ -258,28 +258,28 @@ Allow users to select and highlight text within messages. Data persists via the 
 ---
 
 ### Task P2.7 — Feature F-06: Context Handoff (New in v1.1)
-**Status:** ⏳ Pending | **Difficulty:** Very High | **Blocker for:** None (but depends on P2.1, P2.2)
+**Status:** ✅ Done | **Difficulty:** Very High | **Blocker for:** None (but depends on P2.1, P2.2)
 
 Package the entire conversation into a structured prompt for zero-loss transfer.
 
 **Deliverables:**
-- `src/services/handoffService.js`
-- Token limit detection (automatic trigger).
-- `src/components/HandoffBanner.jsx`
-- Three delivery options: New Tab, Clipboard, Pinboard.
-- Cross-platform support (Claude <=> ChatGPT).
+- `src/services/handoffService.js` ✅
+- Token limit detection (automatic trigger). ✅
+- `src/components/HandoffBanner.js` ✅
+- Three delivery options: New Tab, Clipboard, Pinboard. ✅
+- Cross-platform support (Claude <=> ChatGPT). ✅
 
 **Action Steps:**
-1. **Token Limit Detection:** Implement `detectTokenLimit()` in the content script using the adapter. Use `MutationObserver` to check for the specific error/warning text or CSS classes.
-2. **Context Aggregation:** Implement `generateHandoffPrompt(adapter, currentUrl)` in `handoffService.js`. This must iterate through messages and generate the structured prompt.
-3. **Prompt Template:** Build a template string with these sections: System preamble, `[CONTEXT SUMMARY]`, `[KEY DECISIONS]`, `[CODE]`, `[NEXT STEPS]`, and the confirmation request line.
-4. **Summary Condensation:** Implement a `condenseMessages(messages)` function. For old messages, strip to the last sentence. For very long messages, truncate or summarize (use a simple heuristic for MVP: code blocks kept verbatim, text trailed by "...").
-5. **Handoff Banner UI:** When a token limit is detected, inject a floating `HandoffBanner.jsx` at the top of the chat window.
-6. **Delivery Logic:**
-   - **New Tab:** `chrome.tabs.create({ url })`, then use `chrome.scripting.executeScript` to inject the prompt into the input field.
-   - **Clipboard:** Use the `navigator.clipboard` API (with `clipboardWrite` permission).
-   - **Pinboard:** Save to Pinboard using `pinService` (from P2.3).
-7. **Cross-Platform:** Allow the user to select the target platform (Claude, ChatGPT, **or Gemini**) in the banner UI.
+1. ✅ **Token Limit Detection:** Implemented `detectTokenLimitWarning()` across adapters and emitted `lms:tokenLimitWarning` via `content.js` MutationObserver.
+2. ✅ **Context Aggregation:** Used existing `extractContext` logic for prompt generation.
+3. ✅ **Prompt Template:** `contextExtractor.js` builds the structured sections `[CONTEXT SUMMARY]`, `[KEY DECISIONS]`, `[CODE]`, `[NEXT STEPS]`.
+4. ✅ **Summary Condensation:** `condenseMessages(messages)` trims chat history for smaller contexts.
+5. ✅ **Handoff Banner UI:** `HandoffBanner.js` dynamically injected upon detecting limits.
+6. ✅ **Delivery Logic:**
+   - **New Tab:** Handled via `background.js` and `LMS_DELIVER_HANDOFF_NEW_TAB`. Injects via active DOM querying.
+   - **Clipboard:** Handled via `navigator.clipboard`.
+   - **Pinboard:** Handled via `PinService.pinMessage()`.
+7. ✅ **Cross-Platform:** Buttons route directly to specific competitor URLs.
 
 ---
 

@@ -47,6 +47,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // keep channel open for async
   }
 
+  // ── P2.7 — Deliver handoff prompt to a new tab
+  if (type === 'LMS_DELIVER_HANDOFF_NEW_TAB') {
+    const PLATFORM_URLS = {
+      chatgpt: 'https://chatgpt.com/',
+      claude:  'https://claude.ai/new',
+      gemini:  'https://gemini.google.com/app'
+    };
+    const url = PLATFORM_URLS[request.targetPlatform];
+    if (!url) {
+      sendResponse({ success: false });
+      return false;
+    }
+
+    // Save pending handoff prompt
+    chrome.storage.local.set({ lms_pending_handoff: request.prompt }, () => {
+      chrome.tabs.create({ url }, (tab) => {
+        sendResponse({ success: true, tabId: tab?.id });
+      });
+    });
+    return true;
+  }
+
   // ── Default: echo back for debugging
   sendResponse({ status: 'Background received message', type });
   return true;

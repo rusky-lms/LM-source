@@ -834,7 +834,7 @@
   }
   const PANEL_ID$2 = "lms-context-panel";
   const TOGGLE_BTN_ID$1 = "lms-context-toggle-btn";
-  const STYLE_ID$6 = "lms-context-styles";
+  const STYLE_ID$7 = "lms-context-styles";
   const PANEL_WIDTH = "400px";
   const Z_INDEX$2 = "2147483640";
   const PLATFORM_LABELS = {
@@ -843,7 +843,7 @@
     gemini: "🔵 Google Gemini",
     unknown: "❓ Unknown"
   };
-  function buildStyles$3() {
+  function buildStyles$4() {
     return `
 /* ── LM-Source Context Panel — Injected Styles ── */
 
@@ -1480,10 +1480,10 @@
      */
     render(ctx, { onRefresh } = {}) {
       _onRefresh = onRefresh || null;
-      if (!document.getElementById(STYLE_ID$6)) {
+      if (!document.getElementById(STYLE_ID$7)) {
         const styleEl = document.createElement("style");
-        styleEl.id = STYLE_ID$6;
-        styleEl.textContent = buildStyles$3();
+        styleEl.id = STYLE_ID$7;
+        styleEl.textContent = buildStyles$4();
         document.head.appendChild(styleEl);
       }
       let panel = getPanel$1();
@@ -1525,7 +1525,7 @@
       var _a, _b, _c;
       (_a = document.getElementById(PANEL_ID$2)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID$1)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$6)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$7)) == null ? void 0 : _c.remove();
     },
     /** True if the panel currently exists in the DOM. */
     get isRendered() {
@@ -1804,12 +1804,12 @@
     offPinsChanged
   });
   const TOOLBAR_ID$1 = "lms-msg-toolbar";
-  const STYLE_ID$5 = "lms-toolbar-styles";
+  const STYLE_ID$6 = "lms-toolbar-styles";
   const DATA_MSG_ID = "data-lms-msg-id";
   const DATA_ROLE = "data-lms-role";
   const TOOLBAR_OFFSET_Y = 6;
   const TOOLBAR_OFFSET_X = 8;
-  function buildStyles$2() {
+  function buildStyles$3() {
     return `
 #${TOOLBAR_ID$1} {
   position: fixed;
@@ -1909,10 +1909,10 @@
     return document.getElementById(TOOLBAR_ID$1);
   }
   function createToolbar$1() {
-    if (document.getElementById(STYLE_ID$5)) return;
+    if (document.getElementById(STYLE_ID$6)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$5;
-    style.textContent = buildStyles$2();
+    style.id = STYLE_ID$6;
+    style.textContent = buildStyles$3();
     document.head.appendChild(style);
     const toolbar = document.createElement("div");
     toolbar.id = TOOLBAR_ID$1;
@@ -2021,18 +2021,18 @@
   function unregisterAction(id) {
     _actions.delete(id);
   }
-  function init$2() {
+  function init$3() {
     createToolbar$1();
   }
   function destroy$2() {
     var _a, _b;
     (_a = document.getElementById(TOOLBAR_ID$1)) == null ? void 0 : _a.remove();
-    (_b = document.getElementById(STYLE_ID$5)) == null ? void 0 : _b.remove();
+    (_b = document.getElementById(STYLE_ID$6)) == null ? void 0 : _b.remove();
     _actions.clear();
     clearTimeout(_hideTimer);
   }
   const MessageToolbar = {
-    init: init$2,
+    init: init$3,
     destroy: destroy$2,
     registerAction,
     unregisterAction,
@@ -2041,14 +2041,14 @@
   };
   const PANEL_ID$1 = "lms-pinboard-panel";
   const TOGGLE_BTN_ID = "lms-pinboard-toggle";
-  const STYLE_ID$4 = "lms-pinboard-styles";
+  const STYLE_ID$5 = "lms-pinboard-styles";
   const Z_INDEX$1 = "2147483635";
   const ROLE_COLORS = {
     user: "#60a5fa",
     assistant: "#a78bfa",
     unknown: "#94a3b8"
   };
-  function buildStyles$1() {
+  function buildStyles$2() {
     return `
 /* ── LM-Source Pinboard Panel ── */
 
@@ -2516,10 +2516,10 @@
       _pins = pins;
       _onUnpin = onUnpin || null;
       _onReorder = onReorder || null;
-      if (!document.getElementById(STYLE_ID$4)) {
+      if (!document.getElementById(STYLE_ID$5)) {
         const style = document.createElement("style");
-        style.id = STYLE_ID$4;
-        style.textContent = buildStyles$1();
+        style.id = STYLE_ID$5;
+        style.textContent = buildStyles$2();
         document.head.appendChild(style);
       }
       let panel = getPanel();
@@ -2617,7 +2617,7 @@
       var _a, _b, _c;
       (_a = document.getElementById(PANEL_ID$1)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$4)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$5)) == null ? void 0 : _c.remove();
       _pins = [];
     },
     get isOpen() {
@@ -2630,11 +2630,11 @@
   };
   const HIDDEN_CLASS = "lms-deleted-hidden";
   const REVEALED_CLASS = "lms-deleted-revealed";
-  const STYLE_ID$3 = "lms-delete-styles";
-  function ensureStyles$4() {
-    if (document.getElementById(STYLE_ID$3)) return;
+  const STYLE_ID$4 = "lms-delete-styles";
+  function ensureStyles$5() {
+    if (document.getElementById(STYLE_ID$4)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$3;
+    style.id = STYLE_ID$4;
     style.textContent = `
 /* LM-Source — soft-deleted message state */
 
@@ -2790,7 +2790,7 @@
     el.classList.remove(HIDDEN_CLASS, REVEALED_CLASS);
   }
   async function softDeleteMessage(messageId, platform, conversationId) {
-    ensureStyles$4();
+    ensureStyles$5();
     const records = await _loadRecords$2(platform, conversationId);
     if (records.find((r) => r.messageId === messageId)) {
       return records.find((r) => r.messageId === messageId);
@@ -2824,7 +2824,7 @@
     return new Set(records.map((r) => r.messageId));
   }
   async function softDeleteBulk(messageIds, platform, conversationId) {
-    ensureStyles$4();
+    ensureStyles$5();
     const records = await _loadRecords$2(platform, conversationId);
     const existingIds = new Set(records.map((r) => r.messageId));
     const newRecords = messageIds.filter((id) => !existingIds.has(id)).map((id) => createDeletedMessage({ platform, conversationId, messageId: id }));
@@ -2847,7 +2847,7 @@
     _notify$2("restoredAll", { platform, conversationId });
   }
   async function applyDeletedState(adapterRef, platform, conversationId) {
-    ensureStyles$4();
+    ensureStyles$5();
     const deletedIds = await getDeletedIds(platform, conversationId);
     if (deletedIds.size === 0) return 0;
     let count = 0;
@@ -2872,7 +2872,7 @@
     _bulkMode = true;
     _bulkSelection = /* @__PURE__ */ new Set();
     _onBulkCommit = onCommit;
-    ensureStyles$4();
+    ensureStyles$5();
     document.body.classList.add("lms-bulk-mode");
     messageElements.forEach((el) => {
       const msgId = el.getAttribute("data-lms-msg-id");
@@ -2948,11 +2948,11 @@
   const MAX_HISTORY = 10;
   const EDITED_CLASS = "lms-edited-msg";
   const EDITING_CLASS = "lms-editing-active";
-  const STYLE_ID$2 = "lms-edit-styles";
-  function ensureStyles$3() {
-    if (document.getElementById(STYLE_ID$2)) return;
+  const STYLE_ID$3 = "lms-edit-styles";
+  function ensureStyles$4() {
+    if (document.getElementById(STYLE_ID$3)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$2;
+    style.id = STYLE_ID$3;
     style.textContent = `
 /* LM-Source — edit service injected styles */
 
@@ -3232,7 +3232,7 @@
     setTimeout(() => document.addEventListener("click", onOutside), 0);
   }
   function _showEditor(el, messageId, platform, conversationId, initialText, originalText, history2, onSave, onCancel) {
-    ensureStyles$3();
+    ensureStyles$4();
     if (el.querySelector(".lms-edit-overlay")) return;
     el.classList.add(EDITING_CLASS);
     const node = _getContentNode(el);
@@ -3407,7 +3407,7 @@
   }
   function _applyEditToDOM(el, record) {
     if (!el) return;
-    ensureStyles$3();
+    ensureStyles$4();
     el.classList.add(EDITED_CLASS);
     const node = _getContentNode(el);
     let textNode = node.querySelector("[data-lms-edited-text]");
@@ -3438,7 +3438,7 @@
     );
   }
   async function applyEditsToDOM(adapterRef, platform, conversationId) {
-    ensureStyles$3();
+    ensureStyles$4();
     const records = await _loadRecords$1(platform, conversationId);
     if (records.length === 0) return 0;
     const idMap = new Map(records.map((r) => [r.messageId, r]));
@@ -3457,7 +3457,7 @@
     return count;
   }
   async function openEditor(el, messageId, platform, conversationId) {
-    ensureStyles$3();
+    ensureStyles$4();
     const existingRecord = await getEdit(messageId, platform, conversationId);
     const originalText = existingRecord ? existingRecord.originalText : _getDisplayText(el);
     const currentText = existingRecord ? existingRecord.editedText : originalText;
@@ -3491,11 +3491,11 @@
     offEditChanged,
     EDITED_CLASS
   });
-  const STYLE_ID$1 = "lms-highlight-styles";
-  function ensureStyles$2() {
-    if (document.getElementById(STYLE_ID$1)) return;
+  const STYLE_ID$2 = "lms-highlight-styles";
+  function ensureStyles$3() {
+    if (document.getElementById(STYLE_ID$2)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$1;
+    style.id = STYLE_ID$2;
     style.textContent = `
     .lms-highlight {
       position: relative;
@@ -3565,7 +3565,7 @@
     }
   }
   function _applyHighlightDOM(range, record) {
-    ensureStyles$2();
+    ensureStyles$3();
     const span = document.createElement("span");
     span.className = `lms-highlight lms-highlight-${record.color}`;
     span.dataset.lmsHighlightId = record.id;
@@ -3665,7 +3665,7 @@
     _notify("cleared", { platform, conversationId });
   }
   async function applyHighlightsToDOM(adapterRef, platform, conversationId) {
-    ensureStyles$2();
+    ensureStyles$3();
     const records = await _loadRecords(platform, conversationId);
     if (records.length === 0) return 0;
     let count = 0;
@@ -3696,9 +3696,9 @@
     offHighlightChanged
   });
   const TOOLBAR_ID = "lms-highlight-toolbar";
-  let _platform = null;
-  let _conversationId = null;
-  function ensureStyles$1() {
+  let _platform$1 = null;
+  let _conversationId$1 = null;
+  function ensureStyles$2() {
     if (document.getElementById(TOOLBAR_ID + "-styles")) return;
     const style = document.createElement("style");
     style.id = TOOLBAR_ID + "-styles";
@@ -3742,7 +3742,7 @@
     document.head.appendChild(style);
   }
   function createToolbar() {
-    ensureStyles$1();
+    ensureStyles$2();
     let toolbar = document.getElementById(TOOLBAR_ID);
     if (toolbar) return toolbar;
     toolbar = document.createElement("div");
@@ -3776,8 +3776,8 @@
       sel,
       color,
       activeMessageId,
-      _platform,
-      _conversationId,
+      _platform$1,
+      _conversationId$1,
       activeMessageRoot
     );
     sel.removeAllRanges();
@@ -3829,9 +3829,9 @@
     const rect = range.getBoundingClientRect();
     showToolbar(rect);
   }
-  function init$1(adapterRef, platform, conversationId) {
-    _platform = platform;
-    _conversationId = conversationId;
+  function init$2(adapterRef, platform, conversationId) {
+    _platform$1 = platform;
+    _conversationId$1 = conversationId;
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener("mousedown", (e) => {
       if (!e.target.closest(`#${TOOLBAR_ID}`)) {
@@ -3845,18 +3845,18 @@
     if (t) t.remove();
   }
   const HighlightToolbar = {
-    init: init$1,
+    init: init$2,
     destroy: destroy$1
   };
   const PANEL_ID = "lms-highlights-panel";
-  const STYLE_ID = "lms-highlights-styles";
+  const STYLE_ID$1 = "lms-highlights-styles";
   const Z_INDEX = "2147483636";
   const COLOR_MAP = {
     yellow: { label: "Yellow", bg: "rgba(250, 204, 21, 0.1)", border: "rgba(250, 204, 21, 0.4)" },
     green: { label: "Green", bg: "rgba(74, 222, 128, 0.1)", border: "rgba(74, 222, 128, 0.4)" },
     red: { label: "Red", bg: "rgba(248, 113, 113, 0.1)", border: "rgba(248, 113, 113, 0.4)" }
   };
-  function buildStyles() {
+  function buildStyles$1() {
     return `
 /* ── LM-Source Highlights Panel ── */
 
@@ -4009,16 +4009,16 @@
 }
 `;
   }
-  function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  function ensureStyles$1() {
+    if (document.getElementById(STYLE_ID$1)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = buildStyles();
+    style.id = STYLE_ID$1;
+    style.textContent = buildStyles$1();
     document.head.appendChild(style);
   }
   let _options = null;
   function _createPanel() {
-    ensureStyles();
+    ensureStyles$1();
     const existing = document.getElementById(PANEL_ID);
     if (existing) return existing;
     const panel = document.createElement("div");
@@ -4122,7 +4122,7 @@
   function destroy() {
     const panel = document.getElementById(PANEL_ID);
     if (panel) panel.remove();
-    const style = document.getElementById(STYLE_ID);
+    const style = document.getElementById(STYLE_ID$1);
     if (style) style.remove();
   }
   function addHighlight(hl) {
@@ -4135,6 +4135,204 @@
     destroy,
     addHighlight
   });
+  function generateHandoffPrompt(adapterRef) {
+    const context = extractContext(adapterRef);
+    return context.handoffPrompt;
+  }
+  async function deliverToClipboard(prompt) {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      return true;
+    } catch (e) {
+      console.error("[LM-Source][HandoffService] Failed to write clipboard:", e);
+      return false;
+    }
+  }
+  async function deliverToPinboard(prompt, platform, conversationId) {
+    await pinMessage({
+      platform,
+      conversationId,
+      messageId: "handoff-" + Date.now(),
+      role: "user",
+      text: prompt
+    });
+  }
+  function deliverToNewTab(targetPlatform, prompt) {
+    chrome.runtime.sendMessage({
+      type: "LMS_DELIVER_HANDOFF_NEW_TAB",
+      targetPlatform,
+      prompt
+    });
+  }
+  const HandoffService = {
+    generateHandoffPrompt,
+    deliverToClipboard,
+    deliverToPinboard,
+    deliverToNewTab
+  };
+  const BANNER_ID = "lms-handoff-banner";
+  const STYLE_ID = "lms-handoff-banner-styles";
+  let _adapterRef = null;
+  let _platform = null;
+  let _conversationId = null;
+  function buildStyles() {
+    return `
+    #${BANNER_ID} {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100%);
+      z-index: 2147483645;
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 15px rgba(139, 92, 246, 0.2);
+      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 320px;
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+    #${BANNER_ID}.lms-banner-visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .lms-banner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      color: #c4b5fd;
+    }
+    .lms-banner-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .lms-banner-close:hover { color: #fff; }
+    .lms-banner-text {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+    .lms-banner-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .lms-banner-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lms-banner-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); }
+    .lms-banner-btn.primary {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: rgba(139, 92, 246, 0.5);
+      color: #e0e7ff;
+    }
+    .lms-banner-btn.primary:hover {
+      background: rgba(139, 92, 246, 0.4);
+    }
+  `;
+  }
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = buildStyles();
+    document.head.appendChild(style);
+  }
+  function showBanner() {
+    ensureStyles();
+    let banner = document.getElementById(BANNER_ID);
+    if (banner) {
+      banner.classList.add("lms-banner-visible");
+      return;
+    }
+    banner = document.createElement("div");
+    banner.id = BANNER_ID;
+    const header = document.createElement("div");
+    header.className = "lms-banner-header";
+    header.innerHTML = `<span>⚠️ Token Limit Detected</span>`;
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "lms-banner-close";
+    closeBtn.innerHTML = "✕";
+    closeBtn.onclick = hideBanner;
+    header.appendChild(closeBtn);
+    const text = document.createElement("div");
+    text.className = "lms-banner-text";
+    text.innerHTML = "You are approaching the context length limit. Would you like to extract the context and handoff to another platform?";
+    const actions = document.createElement("div");
+    actions.className = "lms-banner-actions";
+    const copyBtn = _createBtn("📋 Copy Context", async (btn) => {
+      btn.innerHTML = "⏳ Extracting...";
+      const prompt = HandoffService.generateHandoffPrompt(_adapterRef);
+      await HandoffService.deliverToClipboard(prompt);
+      btn.innerHTML = "✓ Copied";
+      setTimeout(() => btn.innerHTML = "📋 Copy Context", 2e3);
+    });
+    const pinBtn = _createBtn("📌 Pin Context", async (btn) => {
+      btn.innerHTML = "⏳ Extracting...";
+      const prompt = HandoffService.generateHandoffPrompt(_adapterRef);
+      await HandoffService.deliverToPinboard(prompt, _platform, _conversationId);
+      btn.innerHTML = "✓ Pinned";
+      setTimeout(() => btn.innerHTML = "📌 Pin Context", 2e3);
+    });
+    const targetPlatforms = ["chatgpt", "claude", "gemini"].filter((p) => p !== _platform);
+    actions.append(copyBtn, pinBtn);
+    for (const t of targetPlatforms) {
+      const name = t.charAt(0).toUpperCase() + t.slice(1);
+      const btn = _createBtn(`🚀 Send to ${name}`, async (b) => {
+        b.innerHTML = "⏳ Extracting...";
+        const prompt = HandoffService.generateHandoffPrompt(_adapterRef);
+        HandoffService.deliverToNewTab(t, prompt);
+        b.innerHTML = "✓ Sent";
+        setTimeout(() => hideBanner(), 1e3);
+      });
+      btn.classList.add("primary");
+      actions.appendChild(btn);
+    }
+    banner.append(header, text, actions);
+    document.body.appendChild(banner);
+    requestAnimationFrame(() => {
+      banner.classList.add("lms-banner-visible");
+    });
+  }
+  function _createBtn(label, onClickAsync) {
+    const btn = document.createElement("button");
+    btn.className = "lms-banner-btn";
+    btn.innerHTML = label;
+    btn.onclick = () => onClickAsync(btn);
+    return btn;
+  }
+  function hideBanner() {
+    const banner = document.getElementById(BANNER_ID);
+    if (banner) {
+      banner.classList.remove("lms-banner-visible");
+    }
+  }
+  function init$1(adapterRef, platform, conversationId) {
+    _adapterRef = adapterRef;
+    _platform = platform;
+    _conversationId = conversationId;
+  }
+  const HandoffBanner = { init: init$1, showBanner, hideBanner };
   const LOG_PREFIX = "[LM-Source]";
   const DEBOUNCE_MS = 400;
   const CONTAINER_POLL_INTERVAL_MS = 500;
@@ -4274,6 +4472,7 @@
     initDeleteFeature(readyAdapter, platform, conversationId);
     initEditFeature(readyAdapter, platform, conversationId);
     initHighlightFeature(readyAdapter, platform, conversationId);
+    initHandoffFeature(readyAdapter, platform, conversationId);
   });
   document.addEventListener("lms:messageAdded", (e) => {
     const { messageId, role, element } = e.detail;
@@ -4555,6 +4754,34 @@
       HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
     });
     console.log(`${LOG_PREFIX} Highlight feature (P2.6) initialised.`);
+  }
+  function initHandoffFeature(adapterRef, platform, conversationId) {
+    HandoffBanner.init(adapterRef, platform, conversationId);
+    chrome.storage.local.get(["lms_pending_handoff"], (res) => {
+      if (res.lms_pending_handoff) {
+        console.log(`${LOG_PREFIX} Pending handoff detected. Injecting...`);
+        const prompt = res.lms_pending_handoff;
+        chrome.storage.local.remove(["lms_pending_handoff"]);
+        setTimeout(() => {
+          const textareas = Array.from(document.querySelectorAll('textarea, [contenteditable="true"]'));
+          const editor = textareas.sort((a, b) => b.offsetHeight - a.offsetHeight)[0];
+          if (editor) {
+            editor.focus();
+            if (editor.tagName.toLowerCase() === "textarea") {
+              editor.value = prompt;
+              editor.dispatchEvent(new Event("input", { bubbles: true }));
+            } else {
+              document.execCommand("insertText", false, prompt);
+            }
+          }
+        }, 2e3);
+      }
+    });
+    window.addEventListener("lms:tokenLimitWarning", () => {
+      console.log(`${LOG_PREFIX} Token limit warning emitted. Showing HandoffBanner.`);
+      HandoffBanner.showBanner();
+    });
+    console.log(`${LOG_PREFIX} Handoff feature (P2.7) initialised.`);
   }
   window.addEventListener("beforeunload", () => {
     if (messageObserver) {

@@ -24,6 +24,24 @@
       });
       return true;
     }
+    if (type === "LMS_DELIVER_HANDOFF_NEW_TAB") {
+      const PLATFORM_URLS = {
+        chatgpt: "https://chatgpt.com/",
+        claude: "https://claude.ai/new",
+        gemini: "https://gemini.google.com/app"
+      };
+      const url = PLATFORM_URLS[request.targetPlatform];
+      if (!url) {
+        sendResponse({ success: false });
+        return false;
+      }
+      chrome.storage.local.set({ lms_pending_handoff: request.prompt }, () => {
+        chrome.tabs.create({ url }, (tab) => {
+          sendResponse({ success: true, tabId: tab == null ? void 0 : tab.id });
+        });
+      });
+      return true;
+    }
     sendResponse({ status: "Background received message", type });
     return true;
   });

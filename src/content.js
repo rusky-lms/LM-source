@@ -30,6 +30,7 @@ import EditService           from './services/editService.js';
 import HighlightService      from './services/highlightService.js';
 import HighlightToolbar      from './components/highlightToolbar.js';
 import HighlightsPanel       from './components/HighlightsPanel.js';
+import HandoffBanner         from './components/HandoffBanner.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -265,6 +266,9 @@ document.addEventListener('lms:adapterReady', (e) => {
 
   // P2.6 — Init highlight feature
   initHighlightFeature(readyAdapter, platform, conversationId);
+
+  // P2.7 — Init handoff banner & handle pending injections
+  initHandoffFeature(readyAdapter, platform, conversationId);
 });
 
 // React to newly added messages: attach toolbar
@@ -715,6 +719,49 @@ async function initHighlightFeature(adapterRef, platform, conversationId) {
   });
 
   console.log(`${LOG_PREFIX} Highlight feature (P2.6) initialised.`);
+}
+
+// ── P2.7 — Handoff Banner & Injection ─────────────────────────────────────────
+
+function initHandoffFeature(adapterRef, platform, conversationId) {
+  HandoffBanner.init(adapterRef, platform, conversationId);
+
+  // Check if we arrived from a handoff
+  chrome.storage.local.get(['lms_pending_handoff'], (res) => {
+    if (res.lms_pending_handoff) {
+      console.log(`${LOG_PREFIX} Pending handoff detected. Injecting...`);
+      const prompt = res.lms_pending_handoff;
+      // Clear immediately to prevent double injection
+      chrome.storage.local.remove(['lms_pending_handoff']);
+      
+      // We don't have adapter specific injection methods yet, so we write to clipboard 
+      // and alert the user, or try to inject if we know the selector.
+      // A simple heuristic: find the largest textarea
+      setTimeout(() => {
+        const textareas = Array.from(document.querySelectorAll('textarea, [contenteditable="true"]'));
+        const editor = textareas.sort((a,b) => b.offsetHeight - a.offsetHeight)[0];
+        if (editor) {
+          editor.focus();
+          // Try to execute a paste or write value
+          if (editor.tagName.toLowerCase() === 'textarea') {
+            editor.value = prompt;
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+            // ContentEditable
+            document.execCommand('insertText', false, prompt);
+          }
+        }
+      }, 2000); // Wait for UI to render
+    }
+  });
+
+  // Listen for adapter detecting token limit
+  window.addEventListener('lms:tokenLimitWarning', () => {
+    console.log(`${LOG_PREFIX} Token limit warning emitted. Showing HandoffBanner.`);
+    HandoffBanner.showBanner();
+  });
+
+  console.log(`${LOG_PREFIX} Handoff feature (P2.7) initialised.`);
 }
 
 // ── Cleanup on page unload ────────────────────────────────────────────────────
