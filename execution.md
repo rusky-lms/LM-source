@@ -148,23 +148,35 @@ Analyse the current chat and extract topics, key entities, decisions, next steps
 ---
 
 ### Task P2.3 — Feature F-02: Pin Messages
-**Status:** ⏳ Pending | **Difficulty:** Medium | **Blocker for:** None (but depends on P1.3, P2.1)
+**Status:** ✅ Done | **Difficulty:** Medium | **Blocker for:** None (but depends on P1.3, P2.1)
 
 Allow users to pin key messages to a Pinboard. Data persists via the Storage Service (P1.3).
 
 **Deliverables:**
-- Pin icon injected on message hover.
-- `src/services/pinService.js`
-- `src/components/PinboardPanel.jsx`
-- Drag-and-drop reordering.
+- `src/services/pinService.js` ✅ — CRUD + pub/sub change listeners
+- `src/components/PinboardPanel.js` ✅ — injected sliding panel with drag-and-drop
+- `src/components/messageToolbar.js` ✅ — shared hover toolbar (pin icon; extended by P2.4/P2.5)
+- Pin icon injected via hover toolbar on every message ✅
+- Drag-and-drop reordering (HTML5 DnD) ✅
+- Unpin + copy per card ✅; Clear-all ✅
+
+**Architecture:**
+- `MessageToolbar` — single floating DOM element repositioned per-hovered message; action registry so P2.4/P2.5 add buttons without touching this file.
+- `PinService` — wraps StorageService collections; change-listener pub/sub (`onPinsChanged`).
+- `PinboardPanel` — left-edge sliding panel (amber theme); optimistic `addPin` / `removePin` for instant feedback; full re-render only on navigation.
+
+**Message flow:**
+- Hover message → toolbar appears → click 📌 → `PinService.pinMessage()` → `PinboardPanel.addPin()` → amber outline ring on message.
+- Click 📌 again → `PinService.unpinMessage()` → `PinboardPanel.removePin()` → ring removed.
+- Popup "Pinboard" → `LMS_OPEN_PINBOARD` → `PinboardPanel.toggle()`.
+- Drag card → drop → `PinService.reorderPins()` persists new order.
 
 **Action Steps:**
-1. In `src/content.js` (using the MutationObserver from P2.1), add a "Pin" SVG icon on hover for each message element provided by the adapter.
-2. `pinService.js`: define `pinMessage(messageData)` (message text, timestamp, platform, conversationId).
-3. Save pins using the storage service (P1.3).
-4. Render a "Pinboard" tab in the popup (or as a side panel) listing all pinned messages.
-5. Implement drag-and-drop for reordering pins in `PinboardPanel.jsx`.
-6. Implement unpinning (removes from storage and UI).
+1. ✅ `pinService.js`: `pinMessage()`, `unpinMessage()`, `getPins()`, `isPinned()`, `reorderPins()`.
+2. ✅ `messageToolbar.js`: hover-attach, action registry, pinned-state ring CSS.
+3. ✅ `PinboardPanel.js`: full panel + HTML5 drag-and-drop + optimistic updates.
+4. ✅ `content.js`: `initPinFeature()` on `lms:adapterReady`; attach toolbar on `lms:messageAdded`.
+5. ✅ `popup.js`: Pinboard button sends `LMS_OPEN_PINBOARD`.
 
 ---
 

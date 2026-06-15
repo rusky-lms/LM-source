@@ -832,22 +832,22 @@
     );
     return ctx;
   }
-  const PANEL_ID = "lms-context-panel";
-  const TOGGLE_BTN_ID = "lms-context-toggle-btn";
-  const STYLE_ID = "lms-context-styles";
+  const PANEL_ID$1 = "lms-context-panel";
+  const TOGGLE_BTN_ID$1 = "lms-context-toggle-btn";
+  const STYLE_ID$2 = "lms-context-styles";
   const PANEL_WIDTH = "400px";
-  const Z_INDEX = "2147483640";
+  const Z_INDEX$1 = "2147483640";
   const PLATFORM_LABELS = {
     claude: "🟣 Claude.ai",
     chatgpt: "🟢 ChatGPT",
     gemini: "🔵 Google Gemini",
     unknown: "❓ Unknown"
   };
-  function buildStyles() {
+  function buildStyles$2() {
     return `
 /* ── LM-Source Context Panel — Injected Styles ── */
 
-#${PANEL_ID} {
+#${PANEL_ID$1} {
   position: fixed;
   top: 0;
   right: 0;
@@ -858,7 +858,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.6;
-  z-index: ${Z_INDEX};
+  z-index: ${Z_INDEX$1};
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 32px rgba(0, 0, 0, 0.6);
@@ -868,7 +868,7 @@
   overflow: hidden;
 }
 
-#${PANEL_ID}.lms-panel-open {
+#${PANEL_ID$1}.lms-panel-open {
   transform: translateX(0);
 }
 
@@ -1218,12 +1218,12 @@
 }
 
 /* ── Floating toggle button ── */
-#${TOGGLE_BTN_ID} {
+#${TOGGLE_BTN_ID$1} {
   position: fixed;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  z-index: ${Number(Z_INDEX) - 1};
+  z-index: ${Number(Z_INDEX$1) - 1};
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
   border: none;
@@ -1241,7 +1241,7 @@
   align-items: center;
   gap: 6px;
 }
-#${TOGGLE_BTN_ID}:hover {
+#${TOGGLE_BTN_ID$1}:hover {
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   padding-right: 12px;
 }
@@ -1272,8 +1272,8 @@
 .lms-refresh-btn:hover { background: rgba(99,102,241,0.1); }
 `;
   }
-  const getPanel = () => document.getElementById(PANEL_ID);
-  function esc(str) {
+  const getPanel$1 = () => document.getElementById(PANEL_ID$1);
+  function esc$1(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
   function activateTab(panel, tabId) {
@@ -1286,7 +1286,7 @@
   }
   function renderSummaryTab(ctx) {
     const timestamp = new Date(ctx.extractedAt).toLocaleTimeString();
-    const topicPills = ctx.topics.length ? ctx.topics.map((t) => `<span class="lms-topic-pill">${esc(t)}</span>`).join("") : '<span class="lms-empty">No topics detected.</span>';
+    const topicPills = ctx.topics.length ? ctx.topics.map((t) => `<span class="lms-topic-pill">${esc$1(t)}</span>`).join("") : '<span class="lms-empty">No topics detected.</span>';
     return `
     <p class="lms-section-heading">Topics & Entities</p>
     <div class="lms-topics-wrap">${topicPills}</div>
@@ -1300,7 +1300,7 @@
       <div>🧠 <strong>${ctx.decisions.length}</strong> key decisions detected</div>
       <div>➡️ <strong>${ctx.nextSteps.length}</strong> next steps detected</div>
       <div>🖥️ <strong>${ctx.codeBlocks.length}</strong> code blocks extracted</div>
-      <div style="color:#374151; font-size:11px; margin-top:4px;">Extracted at ${esc(timestamp)}</div>
+      <div style="color:#374151; font-size:11px; margin-top:4px;">Extracted at ${esc$1(timestamp)}</div>
     </div>
   `;
   }
@@ -1310,16 +1310,16 @@
     }
     const cards = ctx.decisions.map((d) => `
     <div class="lms-card lms-decision-card">
-      <div class="lms-card-role ${esc(d.role)}">${esc(d.role)}</div>
-      <div>${esc(d.sentence)}</div>
+      <div class="lms-card-role ${esc$1(d.role)}">${esc$1(d.role)}</div>
+      <div>${esc$1(d.sentence)}</div>
     </div>
   `).join("");
     const steps = ctx.nextSteps.length === 0 ? "" : `
     <p class="lms-section-heading">Next Steps</p>
     ${ctx.nextSteps.map((s) => `
       <div class="lms-card lms-nextstep-card">
-        <div class="lms-card-role ${esc(s.role)}">${esc(s.role)}</div>
-        <div>${esc(s.sentence)}</div>
+        <div class="lms-card-role ${esc$1(s.role)}">${esc$1(s.role)}</div>
+        <div>${esc$1(s.sentence)}</div>
       </div>
     `).join("")}
   `;
@@ -1336,10 +1336,10 @@
     return ctx.codeBlocks.map((block, idx) => `
     <div class="lms-code-card" data-block-idx="${idx}">
       <div class="lms-code-header">
-        <span class="lms-code-lang">${esc(block.language || "plaintext")}</span>
+        <span class="lms-code-lang">${esc$1(block.language || "plaintext")}</span>
         <button class="lms-copy-btn" data-copy-idx="${idx}" title="Copy code">📋 Copy</button>
       </div>
-      <pre class="lms-code-body">${esc(block.code)}</pre>
+      <pre class="lms-code-body">${esc$1(block.code)}</pre>
     </div>
   `).join("");
   }
@@ -1352,8 +1352,8 @@
       const badge = msg.verbatim ? `<span class="lms-verbatim-badge">VERBATIM</span>` : "";
       return `
       <div class="lms-timeline-msg ${roleClass} ${msg.verbatim ? "verbatim" : ""}">
-        <div class="lms-tl-label">${esc(msg.role.toUpperCase())}${badge}</div>
-        <div>${esc(msg.text)}</div>
+        <div class="lms-tl-label">${esc$1(msg.role.toUpperCase())}${badge}</div>
+        <div>${esc$1(msg.text)}</div>
       </div>
     `;
     }).join("");
@@ -1369,7 +1369,7 @@
       id="lms-handoff-textarea"
       class="lms-handoff-area"
       readonly
-    >${esc(ctx.handoffPrompt)}</textarea>
+    >${esc$1(ctx.handoffPrompt)}</textarea>
     <div class="lms-handoff-actions">
       <button class="lms-action-btn primary" id="lms-copy-handoff">📋 Copy Prompt</button>
       <button class="lms-action-btn secondary" id="lms-open-claude">Open Claude</button>
@@ -1378,7 +1378,7 @@
     </div>
   `;
   }
-  function buildPanelHTML(ctx) {
+  function buildPanelHTML$1(ctx) {
     const platformLabel = PLATFORM_LABELS[ctx.platform] || PLATFORM_LABELS.unknown;
     return `
     <div class="lms-panel-header">
@@ -1392,7 +1392,7 @@
     </div>
 
     <div class="lms-meta-row">
-      <span class="lms-meta-chip">${esc(platformLabel)}</span>
+      <span class="lms-meta-chip">${esc$1(platformLabel)}</span>
       <span class="lms-meta-chip">💬 ${ctx.totalMessages} msgs</span>
       <span class="lms-meta-chip">🧠 ${ctx.decisions.length} decisions</span>
     </div>
@@ -1420,7 +1420,7 @@
   `;
   }
   let _onRefresh = null;
-  function wireEvents(panel, ctx) {
+  function wireEvents$1(panel, ctx) {
     var _a, _b, _c, _d;
     panel.querySelectorAll(".lms-tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => activateTab(panel, btn.dataset.tab));
@@ -1480,25 +1480,25 @@
      */
     render(ctx, { onRefresh } = {}) {
       _onRefresh = onRefresh || null;
-      if (!document.getElementById(STYLE_ID)) {
+      if (!document.getElementById(STYLE_ID$2)) {
         const styleEl = document.createElement("style");
-        styleEl.id = STYLE_ID;
-        styleEl.textContent = buildStyles();
+        styleEl.id = STYLE_ID$2;
+        styleEl.textContent = buildStyles$2();
         document.head.appendChild(styleEl);
       }
-      let panel = getPanel();
+      let panel = getPanel$1();
       if (!panel) {
         panel = document.createElement("div");
-        panel.id = PANEL_ID;
+        panel.id = PANEL_ID$1;
         panel.setAttribute("role", "complementary");
         panel.setAttribute("aria-label", "LM-Source Context Panel");
         document.body.appendChild(panel);
       }
-      panel.innerHTML = buildPanelHTML(ctx);
-      wireEvents(panel, ctx);
-      if (!document.getElementById(TOGGLE_BTN_ID)) {
+      panel.innerHTML = buildPanelHTML$1(ctx);
+      wireEvents$1(panel, ctx);
+      if (!document.getElementById(TOGGLE_BTN_ID$1)) {
         const toggleBtn = document.createElement("button");
-        toggleBtn.id = TOGGLE_BTN_ID;
+        toggleBtn.id = TOGGLE_BTN_ID$1;
         toggleBtn.title = "Toggle LM-Source Context Panel";
         toggleBtn.innerHTML = "✦ LM-Source";
         toggleBtn.addEventListener("click", () => ContextSidePanel.toggle());
@@ -1507,34 +1507,1080 @@
     },
     /** Show the panel. */
     open() {
-      const panel = getPanel();
+      const panel = getPanel$1();
       if (panel) panel.classList.add("lms-panel-open");
     },
     /** Hide the panel. */
     close() {
-      const panel = getPanel();
+      const panel = getPanel$1();
       if (panel) panel.classList.remove("lms-panel-open");
     },
     /** Toggle open/closed state. */
     toggle() {
-      const panel = getPanel();
+      const panel = getPanel$1();
       if (panel) panel.classList.toggle("lms-panel-open");
     },
     /** Remove the panel and its toggle button from the DOM entirely. */
     destroy() {
       var _a, _b, _c;
-      (_a = document.getElementById(PANEL_ID)) == null ? void 0 : _a.remove();
-      (_b = document.getElementById(TOGGLE_BTN_ID)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID)) == null ? void 0 : _c.remove();
+      (_a = document.getElementById(PANEL_ID$1)) == null ? void 0 : _a.remove();
+      (_b = document.getElementById(TOGGLE_BTN_ID$1)) == null ? void 0 : _b.remove();
+      (_c = document.getElementById(STYLE_ID$2)) == null ? void 0 : _c.remove();
     },
     /** True if the panel currently exists in the DOM. */
     get isRendered() {
-      return !!getPanel();
+      return !!getPanel$1();
     },
     /** True if the panel is visible (open). */
     get isOpen() {
       var _a;
-      return !!((_a = getPanel()) == null ? void 0 : _a.classList.contains("lms-panel-open"));
+      return !!((_a = getPanel$1()) == null ? void 0 : _a.classList.contains("lms-panel-open"));
+    }
+  };
+  const QUOTA_BYTES = 2 * 1024 * 1024;
+  const QUOTA_WARN_THRESHOLD = 0.8;
+  const QUOTA_EVICT_THRESHOLD = 0.9;
+  const DATA_TYPES = Object.freeze({
+    PIN: "pin",
+    HIGHLIGHT: "highlight",
+    EDIT: "edit",
+    DELETED: "deleted",
+    HANDOFF: "handoff",
+    META: "meta"
+  });
+  function getNamespaceKey(platform, conversationId, type) {
+    if (!platform || !conversationId || !type) {
+      throw new Error(
+        `[LM-Source][Storage] getNamespaceKey: all arguments are required. Received: platform="${platform}", conversationId="${conversationId}", type="${type}"`
+      );
+    }
+    return `lms::${platform}::${conversationId}::${type}`;
+  }
+  async function get(key) {
+    try {
+      const result = await chrome.storage.local.get(key);
+      return result[key];
+    } catch (err) {
+      console.error("[LM-Source][Storage] get() failed for key:", key, err);
+      return void 0;
+    }
+  }
+  async function set(key, value) {
+    try {
+      const stored = value !== null && typeof value === "object" && !Array.isArray(value) ? { ...value, _updatedAt: Date.now() } : value;
+      await chrome.storage.local.set({ [key]: stored });
+      return true;
+    } catch (err) {
+      console.error("[LM-Source][Storage] set() failed for key:", key, err);
+      return false;
+    }
+  }
+  async function remove(keys) {
+    try {
+      await chrome.storage.local.remove(keys);
+      return true;
+    } catch (err) {
+      console.error("[LM-Source][Storage] remove() failed for keys:", keys, err);
+      return false;
+    }
+  }
+  async function getAll() {
+    try {
+      return await chrome.storage.local.get(null);
+    } catch (err) {
+      console.error("[LM-Source][Storage] getAll() failed:", err);
+      return {};
+    }
+  }
+  async function checkStorageQuota() {
+    try {
+      const usedBytes = await chrome.storage.local.getBytesInUse(null);
+      const usedPercent = usedBytes / QUOTA_BYTES;
+      if (usedPercent >= QUOTA_EVICT_THRESHOLD) {
+        console.warn(
+          `[LM-Source][Storage] ⚠ Storage at ${(usedPercent * 100).toFixed(1)}% of ${QUOTA_BYTES / 1024} KB budget. Evicting LRU entries…`
+        );
+        await _evictLRU();
+      } else if (usedPercent >= QUOTA_WARN_THRESHOLD) {
+        console.warn(
+          `[LM-Source][Storage] ⚠ Storage at ${(usedPercent * 100).toFixed(1)}% of ${QUOTA_BYTES / 1024} KB budget.`
+        );
+      } else {
+        console.log(
+          `[LM-Source][Storage] Storage OK: ${(usedBytes / 1024).toFixed(1)} KB / ${QUOTA_BYTES / 1024} KB (${(usedPercent * 100).toFixed(1)}% used).`
+        );
+      }
+      return { usedBytes, quotaBytes: QUOTA_BYTES, usedPercent };
+    } catch (err) {
+      console.error("[LM-Source][Storage] checkStorageQuota() failed:", err);
+      return { usedBytes: 0, quotaBytes: QUOTA_BYTES, usedPercent: 0 };
+    }
+  }
+  async function _evictLRU() {
+    try {
+      const all = await getAll();
+      const candidates = Object.entries(all).filter(
+        ([key, val]) => key.startsWith("lms::") && val !== null && typeof val === "object" && typeof val._updatedAt === "number"
+      ).sort(([, a], [, b]) => a._updatedAt - b._updatedAt);
+      let removed = 0;
+      for (const [key] of candidates) {
+        await remove(key);
+        removed++;
+        const usedBytes = await chrome.storage.local.getBytesInUse(null);
+        if (usedBytes / QUOTA_BYTES < QUOTA_EVICT_THRESHOLD) break;
+      }
+      console.log(`[LM-Source][Storage] Evicted ${removed} LRU entries.`);
+    } catch (err) {
+      console.error("[LM-Source][Storage] _evictLRU() failed:", err);
+    }
+  }
+  function createPin({ platform, conversationId, messageId, role, text, order = 0 }) {
+    return {
+      id: _generateId(),
+      platform,
+      conversationId,
+      messageId,
+      role,
+      text,
+      pinnedAt: Date.now(),
+      order
+    };
+  }
+  async function appendToCollection(platform, conversationId, type, item) {
+    const key = getNamespaceKey(platform, conversationId, type);
+    const existing = await get(key) || [];
+    existing.push(item);
+    const ok = await set(key, existing);
+    if (ok) await checkStorageQuota();
+    return ok;
+  }
+  async function getCollection(platform, conversationId, type) {
+    const key = getNamespaceKey(platform, conversationId, type);
+    return await get(key) || [];
+  }
+  async function removeFromCollection(platform, conversationId, type, itemId) {
+    const key = getNamespaceKey(platform, conversationId, type);
+    const collection = await get(key) || [];
+    const filtered = collection.filter((item) => item.id !== itemId);
+    if (filtered.length === collection.length) {
+      console.warn(`[LM-Source][Storage] Item ${itemId} not found in ${key}`);
+      return false;
+    }
+    return set(key, filtered);
+  }
+  async function setCollection(platform, conversationId, type, collection) {
+    const key = getNamespaceKey(platform, conversationId, type);
+    return set(key, collection);
+  }
+  function _generateId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  }
+  const _listeners = /* @__PURE__ */ new Set();
+  function _notify(event, detail) {
+    _listeners.forEach((cb) => {
+      try {
+        cb(event, detail);
+      } catch (e) {
+        console.error("[LM-Source][PinService] Listener error:", e);
+      }
+    });
+  }
+  function onPinsChanged(cb) {
+    _listeners.add(cb);
+  }
+  function offPinsChanged(cb) {
+    _listeners.delete(cb);
+  }
+  async function pinMessage(messageData) {
+    const { messageId, platform, conversationId, role, text } = messageData;
+    const existing = await getCollection(platform, conversationId, DATA_TYPES.PIN);
+    const order = existing.length;
+    const pin = createPin({ platform, conversationId, messageId, role, text, order });
+    const ok = await appendToCollection(platform, conversationId, DATA_TYPES.PIN, pin);
+    if (!ok) {
+      throw new Error(`[LM-Source][PinService] Failed to save pin for message ${messageId}`);
+    }
+    console.log(`[LM-Source][PinService] Pinned message ${messageId} (order ${order})`);
+    _notify("pinned", { pin });
+    return pin;
+  }
+  async function unpinMessage(pinId, platform, conversationId) {
+    const ok = await removeFromCollection(platform, conversationId, DATA_TYPES.PIN, pinId);
+    if (ok) {
+      console.log(`[LM-Source][PinService] Unpinned pin ${pinId}`);
+      _notify("unpinned", { pinId, platform, conversationId });
+    }
+    return ok;
+  }
+  async function getPins(platform, conversationId) {
+    const pins = await getCollection(platform, conversationId, DATA_TYPES.PIN);
+    return [...pins].sort((a, b) => a.order - b.order);
+  }
+  async function getAllPins() {
+    const all = await getAll();
+    const pins = [];
+    for (const [key, value] of Object.entries(all)) {
+      if (!key.startsWith("lms::") || !key.endsWith(`::${DATA_TYPES.PIN}`)) continue;
+      if (Array.isArray(value)) {
+        pins.push(...value);
+      }
+    }
+    return pins.sort((a, b) => a.order - b.order);
+  }
+  async function isPinned(messageId, platform, conversationId) {
+    const pins = await getCollection(platform, conversationId, DATA_TYPES.PIN);
+    return pins.find((p) => p.messageId === messageId) || null;
+  }
+  async function reorderPins(platform, conversationId, orderedPinIds) {
+    const pins = await getCollection(platform, conversationId, DATA_TYPES.PIN);
+    const pinMap = new Map(pins.map((p) => [p.id, p]));
+    const reordered = orderedPinIds.map((id, idx) => {
+      const pin = pinMap.get(id);
+      if (!pin) return null;
+      return { ...pin, order: idx };
+    }).filter(Boolean);
+    const ok = await setCollection(platform, conversationId, DATA_TYPES.PIN, reordered);
+    if (ok) {
+      _notify("reordered", { platform, conversationId, orderedPinIds });
+    }
+    return ok;
+  }
+  const PinService = Object.freeze({
+    pinMessage,
+    unpinMessage,
+    getPins,
+    getAllPins,
+    isPinned,
+    reorderPins,
+    onPinsChanged,
+    offPinsChanged
+  });
+  const TOOLBAR_ID = "lms-msg-toolbar";
+  const STYLE_ID$1 = "lms-toolbar-styles";
+  const DATA_MSG_ID = "data-lms-msg-id";
+  const DATA_ROLE = "data-lms-role";
+  const TOOLBAR_OFFSET_Y = 6;
+  const TOOLBAR_OFFSET_X = 8;
+  function buildStyles$1() {
+    return `
+#${TOOLBAR_ID} {
+  position: fixed;
+  z-index: 2147483630;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 17, 27, 0.92);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  border-radius: 10px;
+  padding: 4px 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.15s ease;
+  pointer-events: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+#${TOOLBAR_ID}.lms-tb-visible {
+  display: flex;
+}
+
+.lms-tb-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: 7px;
+  font-size: 14px;
+  line-height: 1;
+  color: #94a3b8;
+  transition: background 0.13s, color 0.13s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.lms-tb-btn:hover {
+  background: rgba(99,102,241,0.15);
+  color: #e2e8f0;
+  transform: scale(1.1);
+}
+.lms-tb-btn.lms-tb-active {
+  color: #818cf8;
+  background: rgba(99,102,241,0.18);
+}
+.lms-tb-btn.lms-tb-pinned {
+  color: #f59e0b;
+}
+.lms-tb-btn.lms-tb-pinned:hover {
+  color: #fbbf24;
+  background: rgba(245,158,11,0.15);
+}
+
+/* Tooltip */
+.lms-tb-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,17,27,0.95);
+  color: #e2e8f0;
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(99,102,241,0.2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.lms-tb-btn:hover::after { opacity: 1; }
+
+/* Divider between button groups */
+.lms-tb-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 2px;
+}
+
+/* Pinned-message highlight ring on the message itself */
+[data-lms-pinned="true"] {
+  outline: 2px solid rgba(245, 158, 11, 0.3) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+`;
+  }
+  const _actions = /* @__PURE__ */ new Map();
+  let _currentEl = null;
+  let _hideTimer = null;
+  function getToolbar() {
+    return document.getElementById(TOOLBAR_ID);
+  }
+  function createToolbar() {
+    if (document.getElementById(STYLE_ID$1)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID$1;
+    style.textContent = buildStyles$1();
+    document.head.appendChild(style);
+    const toolbar = document.createElement("div");
+    toolbar.id = TOOLBAR_ID;
+    toolbar.setAttribute("role", "toolbar");
+    toolbar.setAttribute("aria-label", "LM-Source message actions");
+    document.body.appendChild(toolbar);
+    toolbar.addEventListener("mouseenter", () => {
+      clearTimeout(_hideTimer);
+    });
+    toolbar.addEventListener("mouseleave", () => {
+      scheduleHide();
+    });
+  }
+  function positionOver(el) {
+    const toolbar = getToolbar();
+    if (!toolbar) return;
+    const rect = el.getBoundingClientRect();
+    const tbRect = toolbar.getBoundingClientRect();
+    let top = rect.top - tbRect.height - TOOLBAR_OFFSET_Y;
+    let left = rect.right - tbRect.width - TOOLBAR_OFFSET_X;
+    if (top < 8) top = rect.bottom + TOOLBAR_OFFSET_Y;
+    if (left < 8) left = 8;
+    toolbar.style.top = `${top}px`;
+    toolbar.style.left = `${left}px`;
+  }
+  function renderToolbar(role, messageId, pinnedSet = /* @__PURE__ */ new Map()) {
+    const toolbar = getToolbar();
+    if (!toolbar) return;
+    toolbar.innerHTML = "";
+    let first = true;
+    for (const [actionId, cfg] of _actions) {
+      if (cfg.showFor && !cfg.showFor.includes(role) && !cfg.showFor.includes("all")) {
+        continue;
+      }
+      if (!first) {
+        if (cfg.groupBefore) {
+          const div = document.createElement("span");
+          div.className = "lms-tb-divider";
+          toolbar.appendChild(div);
+        }
+      }
+      first = false;
+      const btn = document.createElement("button");
+      btn.className = "lms-tb-btn";
+      btn.dataset.action = actionId;
+      btn.setAttribute("data-tooltip", cfg.tooltip);
+      btn.setAttribute("aria-label", cfg.tooltip);
+      btn.innerHTML = cfg.icon;
+      if (actionId === "pin" && pinnedSet.has(messageId)) {
+        btn.classList.add("lms-tb-pinned");
+        btn.setAttribute("data-tooltip", "Unpin message");
+        btn.setAttribute("aria-label", "Unpin message");
+      }
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        cfg.onClick({ messageId, role, element: _currentEl, button: btn });
+      });
+      toolbar.appendChild(btn);
+    }
+  }
+  function showToolbar() {
+    var _a;
+    clearTimeout(_hideTimer);
+    (_a = getToolbar()) == null ? void 0 : _a.classList.add("lms-tb-visible");
+  }
+  function scheduleHide(delay = 250) {
+    clearTimeout(_hideTimer);
+    _hideTimer = setTimeout(() => {
+      var _a;
+      (_a = getToolbar()) == null ? void 0 : _a.classList.remove("lms-tb-visible");
+      _currentEl = null;
+    }, delay);
+  }
+  function attachToMessage(el, messageId, role, getPinnedSet) {
+    if (el.dataset.lmsBound === "1") return;
+    el.dataset.lmsBound = "1";
+    el.setAttribute(DATA_MSG_ID, messageId);
+    el.setAttribute(DATA_ROLE, role);
+    el.addEventListener("mouseenter", async () => {
+      clearTimeout(_hideTimer);
+      _currentEl = el;
+      const pinnedSet = typeof getPinnedSet === "function" ? await getPinnedSet() : /* @__PURE__ */ new Map();
+      renderToolbar(role, messageId, pinnedSet);
+      showToolbar();
+      positionOver(el);
+    });
+    el.addEventListener("mousemove", () => {
+      if (_currentEl === el) positionOver(el);
+    });
+    el.addEventListener("mouseleave", () => {
+      scheduleHide();
+    });
+  }
+  function setMessagePinnedState(messageId, isPinned2) {
+    const el = document.querySelector(`[${DATA_MSG_ID}="${messageId}"]`);
+    if (!el) return;
+    if (isPinned2) {
+      el.setAttribute("data-lms-pinned", "true");
+    } else {
+      el.removeAttribute("data-lms-pinned");
+    }
+  }
+  function registerAction(id, config) {
+    _actions.set(id, config);
+  }
+  function unregisterAction(id) {
+    _actions.delete(id);
+  }
+  function init$1() {
+    createToolbar();
+  }
+  function destroy() {
+    var _a, _b;
+    (_a = document.getElementById(TOOLBAR_ID)) == null ? void 0 : _a.remove();
+    (_b = document.getElementById(STYLE_ID$1)) == null ? void 0 : _b.remove();
+    _actions.clear();
+    clearTimeout(_hideTimer);
+  }
+  const MessageToolbar = {
+    init: init$1,
+    destroy,
+    registerAction,
+    unregisterAction,
+    attachToMessage,
+    setMessagePinnedState
+  };
+  const PANEL_ID = "lms-pinboard-panel";
+  const TOGGLE_BTN_ID = "lms-pinboard-toggle";
+  const STYLE_ID = "lms-pinboard-styles";
+  const Z_INDEX = "2147483635";
+  const ROLE_COLORS = {
+    user: "#60a5fa",
+    assistant: "#a78bfa",
+    unknown: "#94a3b8"
+  };
+  function buildStyles() {
+    return `
+/* ── LM-Source Pinboard Panel ── */
+
+#${PANEL_ID} {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 380px;
+  height: 100vh;
+  background: linear-gradient(160deg, #0d1117 0%, #131b2e 100%);
+  color: #e2e8f0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  z-index: ${Z_INDEX};
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 32px rgba(0, 0, 0, 0.55);
+  border-right: 1px solid rgba(245, 158, 11, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+#${PANEL_ID}.lms-pb-open {
+  transform: translateX(0);
+}
+
+/* Header */
+.lms-pb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  background: rgba(245, 158, 11, 0.07);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+  flex-shrink: 0;
+}
+.lms-pb-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.03em;
+}
+.lms-pb-pin-icon {
+  font-size: 16px;
+  animation: lms-pb-sway 3s ease-in-out infinite;
+}
+@keyframes lms-pb-sway {
+  0%, 100% { transform: rotate(-8deg); }
+  50%       { transform: rotate(8deg); }
+}
+.lms-pb-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+.lms-pb-close-btn:hover { background: rgba(245,158,11,0.12); color: #fbbf24; }
+
+/* Subtitle / meta */
+.lms-pb-meta {
+  padding: 8px 16px;
+  font-size: 11px;
+  color: #64748b;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lms-pb-count {
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+/* Scrollable body */
+.lms-pb-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245,158,11,0.25) transparent;
+}
+.lms-pb-body::-webkit-scrollbar { width: 4px; }
+.lms-pb-body::-webkit-scrollbar-thumb {
+  background: rgba(245,158,11,0.3);
+  border-radius: 999px;
+}
+
+/* Empty state */
+.lms-pb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #374151;
+  font-size: 12.5px;
+  text-align: center;
+  gap: 10px;
+}
+.lms-pb-empty-icon { font-size: 36px; opacity: 0.4; }
+
+/* Pin card */
+.lms-pb-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  cursor: grab;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  user-select: none;
+  border-left: 3px solid rgba(245, 158, 11, 0.5);
+}
+.lms-pb-card:hover {
+  border-color: rgba(245,158,11,0.35);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.lms-pb-card.lms-pb-dragging {
+  opacity: 0.45;
+  cursor: grabbing;
+}
+.lms-pb-card.lms-pb-drag-over {
+  border-color: rgba(245,158,11,0.7);
+  box-shadow: 0 0 0 2px rgba(245,158,11,0.25);
+  transform: scale(1.01);
+}
+
+/* Card header row */
+.lms-pb-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  gap: 8px;
+}
+.lms-pb-card-role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.lms-pb-card-meta {
+  font-size: 10px;
+  color: #374151;
+  white-space: nowrap;
+}
+.lms-pb-card-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.lms-pb-card:hover .lms-pb-card-actions { opacity: 1; }
+
+.lms-pb-action-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  transition: background 0.13s, color 0.13s;
+}
+.lms-pb-action-btn:hover { background: rgba(245,158,11,0.12); color: #fbbf24; }
+.lms-pb-action-btn.unpin:hover { background: rgba(239,68,68,0.12); color: #f87171; }
+
+/* Card body — truncated text */
+.lms-pb-card-text {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lms-pb-card-text.expanded {
+  -webkit-line-clamp: unset;
+}
+
+/* Expand / collapse toggle */
+.lms-pb-expand-btn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 0;
+  display: block;
+  margin-top: 4px;
+  transition: color 0.15s;
+}
+.lms-pb-expand-btn:hover { color: #818cf8; }
+
+/* Drag handle */
+.lms-pb-drag-handle {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.12);
+  font-size: 13px;
+  cursor: grab;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Footer */
+.lms-pb-footer {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #374151;
+}
+.lms-pb-clear-btn {
+  background: none;
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #ef4444;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lms-pb-clear-btn:hover { background: rgba(239,68,68,0.1); }
+
+/* Floating toggle button (left edge, above ContextPanel's right-edge toggle) */
+#${TOGGLE_BTN_ID} {
+  position: fixed;
+  left: 0;
+  top: calc(50% + 40px);
+  transform: translateY(-50%);
+  z-index: ${Number(Z_INDEX) - 1};
+  background: linear-gradient(135deg, #b45309, #d97706);
+  color: #fff;
+  border: none;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 8px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 2px 0 16px rgba(180,83,9,0.4);
+  transition: padding 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#${TOGGLE_BTN_ID}:hover {
+  background: linear-gradient(135deg, #92400e, #b45309);
+  padding-left: 12px;
+}
+`;
+  }
+  const getPanel = () => document.getElementById(PANEL_ID);
+  function esc(str) {
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function fmtDate(ts) {
+    return new Date(ts).toLocaleString(void 0, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+  function buildCardHTML(pin) {
+    const roleColor = ROLE_COLORS[pin.role] || ROLE_COLORS.unknown;
+    const preview = pin.text.length > 350 ? pin.text.slice(0, 350) + "…" : pin.text;
+    const hasMore = pin.text.length > 350;
+    return `
+    <div class="lms-pb-card"
+         draggable="true"
+         data-pin-id="${esc(pin.id)}"
+         data-message-id="${esc(pin.messageId)}">
+      <span class="lms-pb-drag-handle" aria-hidden="true">⋮⋮</span>
+      <div class="lms-pb-card-header">
+        <span class="lms-pb-card-role" style="color:${roleColor}">
+          ${esc(pin.role)}
+        </span>
+        <span class="lms-pb-card-meta">${esc(fmtDate(pin.pinnedAt))}</span>
+        <div class="lms-pb-card-actions">
+          <button class="lms-pb-action-btn copy-pin"
+                  data-pin-id="${esc(pin.id)}"
+                  title="Copy text">📋</button>
+          <button class="lms-pb-action-btn unpin"
+                  data-pin-id="${esc(pin.id)}"
+                  title="Unpin">✕</button>
+        </div>
+      </div>
+      <div class="lms-pb-card-text" data-pin-id="${esc(pin.id)}">${esc(preview)}</div>
+      ${hasMore ? `
+        <button class="lms-pb-expand-btn" data-pin-id="${esc(pin.id)}"
+                data-full-text="${esc(pin.text)}">Show more ▾</button>
+      ` : ""}
+    </div>
+  `;
+  }
+  let _dragId = null;
+  let _onReorder = null;
+  function wireDragDrop(panel) {
+    const body = panel.querySelector(".lms-pb-body");
+    if (!body) return;
+    body.addEventListener("dragstart", (e) => {
+      const card = e.target.closest(".lms-pb-card");
+      if (!card) return;
+      _dragId = card.dataset.pinId;
+      card.classList.add("lms-pb-dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", _dragId);
+    });
+    body.addEventListener("dragend", (e) => {
+      const card = e.target.closest(".lms-pb-card");
+      if (card) card.classList.remove("lms-pb-dragging");
+      body.querySelectorAll(".lms-pb-drag-over").forEach((el) => el.classList.remove("lms-pb-drag-over"));
+    });
+    body.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      const card = e.target.closest(".lms-pb-card");
+      body.querySelectorAll(".lms-pb-drag-over").forEach((el) => el.classList.remove("lms-pb-drag-over"));
+      if (card && card.dataset.pinId !== _dragId) {
+        card.classList.add("lms-pb-drag-over");
+      }
+    });
+    body.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const targetCard = e.target.closest(".lms-pb-card");
+      if (!targetCard || !_dragId) return;
+      const targetId = targetCard.dataset.pinId;
+      if (targetId === _dragId) return;
+      const dragCard = body.querySelector(`[data-pin-id="${_dragId}"]`);
+      if (!dragCard) return;
+      const cards = [...body.querySelectorAll(".lms-pb-card")];
+      const dragIdx = cards.findIndex((c) => c.dataset.pinId === _dragId);
+      const targetIdx = cards.findIndex((c) => c.dataset.pinId === targetId);
+      if (dragIdx < targetIdx) {
+        targetCard.after(dragCard);
+      } else {
+        targetCard.before(dragCard);
+      }
+      const newOrder = [...body.querySelectorAll(".lms-pb-card")].map((c) => c.dataset.pinId);
+      if (typeof _onReorder === "function") {
+        _onReorder(newOrder);
+      }
+      targetCard.classList.remove("lms-pb-drag-over");
+      _dragId = null;
+    });
+  }
+  let _onUnpin = null;
+  function wireEvents(panel) {
+    var _a, _b, _c;
+    (_a = panel.querySelector(".lms-pb-close-btn")) == null ? void 0 : _a.addEventListener("click", () => PinboardPanel.close());
+    (_b = panel.querySelector(".lms-pb-clear-btn")) == null ? void 0 : _b.addEventListener("click", () => {
+      if (confirm("Remove all pinned messages? This cannot be undone.")) {
+        if (typeof _onUnpin === "function") {
+          const cards = panel.querySelectorAll(".lms-pb-card");
+          cards.forEach((c) => _onUnpin(c.dataset.pinId, true));
+        }
+      }
+    });
+    (_c = panel.querySelector(".lms-pb-body")) == null ? void 0 : _c.addEventListener("click", (e) => {
+      var _a2, _b2;
+      const copyBtn = e.target.closest(".copy-pin");
+      if (copyBtn) {
+        const pinId = copyBtn.dataset.pinId;
+        const card = panel.querySelector(`.lms-pb-card[data-pin-id="${pinId}"]`);
+        const fullText = ((_a2 = card == null ? void 0 : card.querySelector(".lms-pb-expand-btn")) == null ? void 0 : _a2.dataset.fullText) || ((_b2 = card == null ? void 0 : card.querySelector(".lms-pb-card-text")) == null ? void 0 : _b2.textContent) || "";
+        navigator.clipboard.writeText(fullText.trim()).then(() => {
+          copyBtn.textContent = "✅";
+          setTimeout(() => {
+            copyBtn.textContent = "📋";
+          }, 1600);
+        });
+        return;
+      }
+      const unpinBtn = e.target.closest(".unpin");
+      if (unpinBtn) {
+        const pinId = unpinBtn.dataset.pinId;
+        if (typeof _onUnpin === "function") _onUnpin(pinId, false);
+        return;
+      }
+      const expandBtn = e.target.closest(".lms-pb-expand-btn");
+      if (expandBtn) {
+        const pinId = expandBtn.dataset.pinId;
+        const textEl = panel.querySelector(`.lms-pb-card-text[data-pin-id="${pinId}"]`);
+        const isExp = textEl == null ? void 0 : textEl.classList.contains("expanded");
+        if (textEl) {
+          textEl.classList.toggle("expanded");
+          if (!isExp) {
+            textEl.textContent = expandBtn.dataset.fullText || textEl.textContent;
+          } else {
+            const full = expandBtn.dataset.fullText || textEl.textContent;
+            textEl.textContent = full.slice(0, 350) + (full.length > 350 ? "…" : "");
+          }
+          expandBtn.textContent = isExp ? "Show more ▾" : "Show less ▴";
+        }
+      }
+    });
+    wireDragDrop(panel);
+  }
+  function buildPanelHTML(pins, platform, conversationId) {
+    const count = pins.length;
+    const cardsHTML = count === 0 ? `<div class="lms-pb-empty">
+         <span class="lms-pb-empty-icon">📌</span>
+         <span>No pins yet.<br>Hover a message and click 📌 to pin it.</span>
+       </div>` : pins.map(buildCardHTML).join("");
+    return `
+    <div class="lms-pb-header">
+      <div class="lms-pb-title">
+        <span class="lms-pb-pin-icon">📌</span>
+        Pinboard
+      </div>
+      <button class="lms-pb-close-btn" aria-label="Close pinboard">✕</button>
+    </div>
+
+    <div class="lms-pb-meta">
+      <span>${esc(platform)} · ${esc(conversationId)}</span>
+      <span class="lms-pb-count">${count} pin${count !== 1 ? "s" : ""}</span>
+    </div>
+
+    <div class="lms-pb-body">${cardsHTML}</div>
+
+    <div class="lms-pb-footer">
+      <span>Drag cards to reorder</span>
+      ${count > 0 ? '<button class="lms-pb-clear-btn">Clear all</button>' : ""}
+    </div>
+  `;
+  }
+  let _pins = [];
+  const PinboardPanel = {
+    /**
+     * Create or refresh the panel.
+     *
+     * @param {import('../services/types.js').Pin[]} pins
+     * @param {{
+     *   platform:       string,
+     *   conversationId: string,
+     *   onUnpin:        (pinId: string, clearAll: boolean) => void,
+     *   onReorder:      (orderedPinIds: string[]) => void,
+     * }} options
+     */
+    render(pins, { platform = "unknown", conversationId = "", onUnpin, onReorder } = {}) {
+      _pins = pins;
+      _onUnpin = onUnpin || null;
+      _onReorder = onReorder || null;
+      if (!document.getElementById(STYLE_ID)) {
+        const style = document.createElement("style");
+        style.id = STYLE_ID;
+        style.textContent = buildStyles();
+        document.head.appendChild(style);
+      }
+      let panel = getPanel();
+      if (!panel) {
+        panel = document.createElement("div");
+        panel.id = PANEL_ID;
+        panel.setAttribute("role", "complementary");
+        panel.setAttribute("aria-label", "LM-Source Pinboard");
+        document.body.appendChild(panel);
+      }
+      panel.innerHTML = buildPanelHTML(pins, platform, conversationId);
+      wireEvents(panel);
+      if (!document.getElementById(TOGGLE_BTN_ID)) {
+        const toggleBtn = document.createElement("button");
+        toggleBtn.id = TOGGLE_BTN_ID;
+        toggleBtn.title = "Toggle Pinboard";
+        toggleBtn.innerHTML = "📌 Pins";
+        toggleBtn.addEventListener("click", () => PinboardPanel.toggle());
+        document.body.appendChild(toggleBtn);
+      }
+    },
+    /** Open the panel. */
+    open() {
+      var _a;
+      (_a = getPanel()) == null ? void 0 : _a.classList.add("lms-pb-open");
+    },
+    /** Close the panel. */
+    close() {
+      var _a;
+      (_a = getPanel()) == null ? void 0 : _a.classList.remove("lms-pb-open");
+    },
+    /** Toggle open/closed. */
+    toggle() {
+      var _a;
+      (_a = getPanel()) == null ? void 0 : _a.classList.toggle("lms-pb-open");
+    },
+    /**
+     * Optimistically add a pin card to the panel without a full re-render.
+     * @param {import('../services/types.js').Pin} pin
+     */
+    addPin(pin) {
+      const panel = getPanel();
+      if (!panel) return;
+      const empty = panel.querySelector(".lms-pb-empty");
+      if (empty) empty.remove();
+      const body = panel.querySelector(".lms-pb-body");
+      if (body) {
+        const tmp = document.createElement("div");
+        tmp.innerHTML = buildCardHTML(pin);
+        const card = tmp.firstElementChild;
+        if (card) {
+          body.appendChild(card);
+          _pins = [..._pins, pin];
+          const chip = panel.querySelector(".lms-pb-count");
+          if (chip) chip.textContent = `${_pins.length} pin${_pins.length !== 1 ? "s" : ""}`;
+          const footer = panel.querySelector(".lms-pb-footer");
+          if (footer && !footer.querySelector(".lms-pb-clear-btn")) {
+            const btn = document.createElement("button");
+            btn.className = "lms-pb-clear-btn";
+            btn.textContent = "Clear all";
+            btn.addEventListener("click", () => {
+              if (confirm("Remove all pinned messages?")) {
+                _pins.forEach((p) => typeof _onUnpin === "function" && _onUnpin(p.id, true));
+              }
+            });
+            footer.appendChild(btn);
+          }
+          wireDragDrop(panel);
+        }
+      }
+    },
+    /**
+     * Optimistically remove a pin card.
+     * @param {string} pinId
+     */
+    removePin(pinId) {
+      var _a, _b;
+      const panel = getPanel();
+      if (!panel) return;
+      (_a = panel.querySelector(`.lms-pb-card[data-pin-id="${pinId}"]`)) == null ? void 0 : _a.remove();
+      _pins = _pins.filter((p) => p.id !== pinId);
+      const chip = panel.querySelector(".lms-pb-count");
+      if (chip) chip.textContent = `${_pins.length} pin${_pins.length !== 1 ? "s" : ""}`;
+      const body = panel.querySelector(".lms-pb-body");
+      if (body && _pins.length === 0) {
+        body.innerHTML = `<div class="lms-pb-empty">
+        <span class="lms-pb-empty-icon">📌</span>
+        <span>No pins yet.<br>Hover a message and click 📌 to pin it.</span>
+      </div>`;
+        (_b = panel.querySelector(".lms-pb-clear-btn")) == null ? void 0 : _b.remove();
+      }
+    },
+    /** Remove panel + toggle from DOM. */
+    destroy() {
+      var _a, _b, _c;
+      (_a = document.getElementById(PANEL_ID)) == null ? void 0 : _a.remove();
+      (_b = document.getElementById(TOGGLE_BTN_ID)) == null ? void 0 : _b.remove();
+      (_c = document.getElementById(STYLE_ID)) == null ? void 0 : _c.remove();
+      _pins = [];
+    },
+    get isOpen() {
+      var _a;
+      return !!((_a = getPanel()) == null ? void 0 : _a.classList.contains("lms-pb-open"));
+    },
+    get isRendered() {
+      return !!getPanel();
     }
   };
   const LOG_PREFIX = "[LM-Source]";
@@ -1610,10 +2656,15 @@
       sendResponse({ success: true });
       return true;
     }
+    if ((request == null ? void 0 : request.type) === "LMS_OPEN_PINBOARD") {
+      PinboardPanel.toggle();
+      sendResponse({ success: true });
+      return true;
+    }
     return false;
   });
   document.addEventListener("lms:adapterReady", (e) => {
-    const { adapter: readyAdapter } = e.detail;
+    const { adapter: readyAdapter, platform, conversationId } = e.detail;
     setTimeout(() => {
       const ctx = extractContext(readyAdapter);
       if (ctx) {
@@ -1622,6 +2673,19 @@
         });
       }
     }, 1500);
+    initPinFeature(readyAdapter, platform, conversationId);
+  });
+  document.addEventListener("lms:messageAdded", (e) => {
+    const { messageId, role, element } = e.detail;
+    if (!element || !adapter) return;
+    const platform = adapter.getPlatformIdentifier();
+    const conversationId = adapter.getConversationId();
+    MessageToolbar.attachToMessage(
+      element,
+      messageId,
+      role,
+      () => buildPinnedSet(platform, conversationId)
+    );
   });
   function waitForChatContainer(adapter2) {
     return new Promise((resolve) => {
@@ -1726,6 +2790,90 @@
     seenMessageIds.clear();
     _tokenLimitWarned = false;
     setTimeout(() => init(adapter2), 500);
+  }
+  async function buildPinnedSet(platform, conversationId) {
+    const pins = await PinService.getPins(platform, conversationId);
+    return new Map(pins.map((p) => [p.messageId, true]));
+  }
+  async function initPinFeature(adapterRef, platform, conversationId) {
+    MessageToolbar.init();
+    MessageToolbar.registerAction("pin", {
+      icon: "📌",
+      tooltip: "Pin message",
+      showFor: ["all"],
+      onClick: async ({ messageId, role, element, button }) => {
+        const existing = await PinService.isPinned(messageId, platform, conversationId);
+        if (existing) {
+          await PinService.unpinMessage(existing.id, platform, conversationId);
+          MessageToolbar.setMessagePinnedState(messageId, false);
+          button.classList.remove("lms-tb-pinned");
+          button.setAttribute("data-tooltip", "Pin message");
+          PinboardPanel.removePin(existing.id);
+          console.log(`${LOG_PREFIX} Unpinned message ${messageId}`);
+        } else {
+          const msgData = adapter ? adapter.extractMessageData(element) : null;
+          const text = (msgData == null ? void 0 : msgData.text) || (element == null ? void 0 : element.innerText) || "";
+          const pin = await PinService.pinMessage({
+            messageId,
+            platform,
+            conversationId,
+            role,
+            text
+          });
+          MessageToolbar.setMessagePinnedState(messageId, true);
+          button.classList.add("lms-tb-pinned");
+          button.setAttribute("data-tooltip", "Unpin message");
+          PinboardPanel.addPin(pin);
+          console.log(`${LOG_PREFIX} Pinned message ${messageId}`);
+        }
+      }
+    });
+    const pins = await PinService.getPins(platform, conversationId);
+    PinboardPanel.render(pins, {
+      platform,
+      conversationId,
+      onUnpin: async (pinId, clearAll) => {
+        if (clearAll) {
+          const all = await PinService.getPins(platform, conversationId);
+          for (const p of all) {
+            await PinService.unpinMessage(p.id, platform, conversationId);
+            MessageToolbar.setMessagePinnedState(p.messageId, false);
+          }
+          PinboardPanel.render([], {
+            platform,
+            conversationId,
+            onUnpin: arguments.callee,
+            onReorder: async (ids) => {
+              await PinService.reorderPins(platform, conversationId, ids);
+            }
+          });
+          return;
+        }
+        const pin = pins.find((p) => p.id === pinId);
+        await PinService.unpinMessage(pinId, platform, conversationId);
+        if (pin) MessageToolbar.setMessagePinnedState(pin.messageId, false);
+        PinboardPanel.removePin(pinId);
+      },
+      onReorder: async (orderedIds) => {
+        await PinService.reorderPins(platform, conversationId, orderedIds);
+      }
+    });
+    for (const pin of pins) {
+      MessageToolbar.setMessagePinnedState(pin.messageId, true);
+    }
+    const elements = adapterRef.getMessageElements();
+    elements.forEach((el, idx) => {
+      const data = adapterRef.extractMessageData(el, idx);
+      if (data) {
+        MessageToolbar.attachToMessage(
+          el,
+          data.messageId,
+          data.role,
+          () => buildPinnedSet(platform, conversationId)
+        );
+      }
+    });
+    console.log(`${LOG_PREFIX} Pin feature initialised. ${pins.length} existing pin(s) loaded.`);
   }
   window.addEventListener("beforeunload", () => {
     if (messageObserver) {

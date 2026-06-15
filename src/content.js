@@ -10,6 +10,7 @@
 //  5. Expose a lightweight internal event bus so feature modules (P2.2–P2.7)
 //     can subscribe to 'lms:messageAdded' and 'lms:tokenLimitWarning' events.
 //  6. (P2.2) Listen for LMS_EXTRACT_CONTEXT messages and trigger context extraction.
+//  7. (P2.3) Inject per-message toolbar with Pin action; manage Pinboard panel.
 
 'use strict';
 
@@ -18,6 +19,9 @@ import { ChatGPTAdapter }   from './adapters/chatgptAdapter.js';
 import { GeminiAdapter }    from './adapters/geminiAdapter.js';
 import { extractContext }   from './services/contextExtractor.js';
 import { ContextSidePanel } from './components/ContextSidePanel.js';
+import PinService            from './services/pinService.js';
+import { MessageToolbar }   from './components/messageToolbar.js';
+import { PinboardPanel }    from './components/PinboardPanel.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -169,24 +173,49 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true;
   }
 
+  if (request?.type === 'LMS_OPEN_PINBOARD') {
+    PinboardPanel.toggle();
+    sendResponse({ success: true });
+    return true;
+  }
+
   return false;
 });
 
 // Auto-render the side panel (without opening it) once the adapter is ready,
 // so the floating toggle button appears as soon as the page loads.
 document.addEventListener('lms:adapterReady', (e) => {
-  const { adapter: readyAdapter } = e.detail;
-  // Small delay to let the host page settle before we scan messages
+  const { adapter: readyAdapter, platform, conversationId } = e.detail;
+
+  // P2.2 — Context side panel auto-render
   setTimeout(() => {
     const ctx = extractContext(readyAdapter);
     if (ctx) {
       ContextSidePanel.render(ctx, {
         onRefresh: () => runContextExtraction(readyAdapter),
       });
-      // Panel starts closed; user opens via toggle button or popup
     }
   }, 1500);
+
+  // P2.3 — Init message toolbar + pinboard
+  initPinFeature(readyAdapter, platform, conversationId);
 });
+
+// React to newly added messages: attach toolbar
+document.addEventListener('lms:messageAdded', (e) => {
+  const { messageId, role, element } = e.detail;
+  if (!element || !adapter) return;
+
+  const platform       = adapter.getPlatformIdentifier();
+  const conversationId = adapter.getConversationId();
+
+  MessageToolbar.attachToMessage(
+    element,
+    messageId,
+    role,
+    () => buildPinnedSet(platform, conversationId),
+  );
+});;
 
 // ── Chat container polling ────────────────────────────────────────────────────
 
@@ -374,6 +403,121 @@ function onNavigate(adapter, previousPath) {
 
   // Re-initialise for the new conversation
   setTimeout(() => init(adapter), 500); // Brief delay for the SPA to mount the new view
+}
+
+// ── P2.3 — Pin feature initialisation ────────────────────────────────────────
+
+/**
+ * Build a Map<messageId, true> of currently-pinned messages for this conversation.
+ * Used by the toolbar to show the active pin state.
+ *
+ * @param {string} platform
+ * @param {string} conversationId
+ * @returns {Promise<Map<string, boolean>>}
+ */
+async function buildPinnedSet(platform, conversationId) {
+  const pins = await PinService.getPins(platform, conversationId);
+  return new Map(pins.map(p => [p.messageId, true]));
+}
+
+/**
+ * Initialise the pin feature for the current conversation:
+ *   1. Init toolbar DOM + register pin action
+ *   2. Load existing pins from storage
+ *   3. Render pinboard panel
+ *   4. Restore pinned-state outline rings on all existing message elements
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapterRef
+ * @param {string} platform
+ * @param {string} conversationId
+ */
+async function initPinFeature(adapterRef, platform, conversationId) {
+  // 1. Toolbar init
+  MessageToolbar.init();
+
+  // 2. Register pin action (idempotent — registerAction overwrites by ID)
+  MessageToolbar.registerAction('pin', {
+    icon: '📌',
+    tooltip: 'Pin message',
+    showFor: ['all'],
+    onClick: async ({ messageId, role, element, button }) => {
+      // Toggle: check if already pinned
+      const existing = await PinService.isPinned(messageId, platform, conversationId);
+
+      if (existing) {
+        // Unpin
+        await PinService.unpinMessage(existing.id, platform, conversationId);
+        MessageToolbar.setMessagePinnedState(messageId, false);
+        button.classList.remove('lms-tb-pinned');
+        button.setAttribute('data-tooltip', 'Pin message');
+        PinboardPanel.removePin(existing.id);
+        console.log(`${LOG_PREFIX} Unpinned message ${messageId}`);
+      } else {
+        // Pin — get text from adapter
+        const msgData = adapter ? adapter.extractMessageData(element) : null;
+        const text = msgData?.text || element?.innerText || '';
+
+        const pin = await PinService.pinMessage({
+          messageId, platform, conversationId, role, text,
+        });
+        MessageToolbar.setMessagePinnedState(messageId, true);
+        button.classList.add('lms-tb-pinned');
+        button.setAttribute('data-tooltip', 'Unpin message');
+        PinboardPanel.addPin(pin);
+        console.log(`${LOG_PREFIX} Pinned message ${messageId}`);
+      }
+    },
+  });
+
+  // 3. Load pins from storage
+  const pins = await PinService.getPins(platform, conversationId);
+
+  // 4. Render pinboard (closed by default)
+  PinboardPanel.render(pins, {
+    platform,
+    conversationId,
+    onUnpin: async (pinId, clearAll) => {
+      if (clearAll) {
+        // Remove all pins for this conversation
+        const all = await PinService.getPins(platform, conversationId);
+        for (const p of all) {
+          await PinService.unpinMessage(p.id, platform, conversationId);
+          MessageToolbar.setMessagePinnedState(p.messageId, false);
+        }
+        PinboardPanel.render([], { platform, conversationId,
+          onUnpin: arguments.callee,
+          onReorder: async (ids) => { await PinService.reorderPins(platform, conversationId, ids); },
+        });
+        return;
+      }
+      const pin = pins.find(p => p.id === pinId);
+      await PinService.unpinMessage(pinId, platform, conversationId);
+      if (pin) MessageToolbar.setMessagePinnedState(pin.messageId, false);
+      PinboardPanel.removePin(pinId);
+    },
+    onReorder: async (orderedIds) => {
+      await PinService.reorderPins(platform, conversationId, orderedIds);
+    },
+  });
+
+  // 5. Restore pinned-state rings on already-rendered message elements
+  for (const pin of pins) {
+    MessageToolbar.setMessagePinnedState(pin.messageId, true);
+  }
+
+  // 6. Attach toolbar to all existing message elements
+  const elements = adapterRef.getMessageElements();
+  elements.forEach((el, idx) => {
+    const data = adapterRef.extractMessageData(el, idx);
+    if (data) {
+      MessageToolbar.attachToMessage(
+        el, data.messageId, data.role,
+        () => buildPinnedSet(platform, conversationId),
+      );
+    }
+  });
+
+  console.log(`${LOG_PREFIX} Pin feature initialised. ${pins.length} existing pin(s) loaded.`);
 }
 
 // ── Cleanup on page unload ────────────────────────────────────────────────────

@@ -102,8 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   pinboardBtn.addEventListener('click', () => {
-    console.log('[LM-Source] Pinboard clicked');
-    // TODO: Implement in P2.3
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(activeTabId, { type: 'LMS_OPEN_PINBOARD' });
+    window.close();
   });
 
   handoffBtn.addEventListener('click', () => {

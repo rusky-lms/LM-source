@@ -106,7 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
   pinboardBtn.addEventListener("click", () => {
-    console.log("[LM-Source] Pinboard clicked");
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(activeTabId, { type: "LMS_OPEN_PINBOARD" });
+    window.close();
   });
   handoffBtn.addEventListener("click", () => {
     if (activeTabId === null) return;
