@@ -834,7 +834,7 @@
   }
   const PANEL_ID$1 = "lms-context-panel";
   const TOGGLE_BTN_ID$1 = "lms-context-toggle-btn";
-  const STYLE_ID$3 = "lms-context-styles";
+  const STYLE_ID$4 = "lms-context-styles";
   const PANEL_WIDTH = "400px";
   const Z_INDEX$1 = "2147483640";
   const PLATFORM_LABELS = {
@@ -1480,9 +1480,9 @@
      */
     render(ctx, { onRefresh } = {}) {
       _onRefresh = onRefresh || null;
-      if (!document.getElementById(STYLE_ID$3)) {
+      if (!document.getElementById(STYLE_ID$4)) {
         const styleEl = document.createElement("style");
-        styleEl.id = STYLE_ID$3;
+        styleEl.id = STYLE_ID$4;
         styleEl.textContent = buildStyles$2();
         document.head.appendChild(styleEl);
       }
@@ -1525,7 +1525,7 @@
       var _a, _b, _c;
       (_a = document.getElementById(PANEL_ID$1)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID$1)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$3)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$4)) == null ? void 0 : _c.remove();
     },
     /** True if the panel currently exists in the DOM. */
     get isRendered() {
@@ -1646,6 +1646,17 @@
       order
     };
   }
+  function createEdit({ platform, conversationId, messageId, originalText, editedText }) {
+    return {
+      id: _generateId(),
+      platform,
+      conversationId,
+      messageId,
+      originalText,
+      editedText,
+      editedAt: Date.now()
+    };
+  }
   function createDeletedMessage({ platform, conversationId, messageId }) {
     return {
       id: _generateId(),
@@ -1687,9 +1698,9 @@
     }
     return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   }
-  const _listeners$1 = /* @__PURE__ */ new Set();
-  function _notify$1(event, detail) {
-    _listeners$1.forEach((cb) => {
+  const _listeners$2 = /* @__PURE__ */ new Set();
+  function _notify$2(event, detail) {
+    _listeners$2.forEach((cb) => {
       try {
         cb(event, detail);
       } catch (e) {
@@ -1698,10 +1709,10 @@
     });
   }
   function onPinsChanged(cb) {
-    _listeners$1.add(cb);
+    _listeners$2.add(cb);
   }
   function offPinsChanged(cb) {
-    _listeners$1.delete(cb);
+    _listeners$2.delete(cb);
   }
   async function pinMessage(messageData) {
     const { messageId, platform, conversationId, role, text } = messageData;
@@ -1713,14 +1724,14 @@
       throw new Error(`[LM-Source][PinService] Failed to save pin for message ${messageId}`);
     }
     console.log(`[LM-Source][PinService] Pinned message ${messageId} (order ${order})`);
-    _notify$1("pinned", { pin });
+    _notify$2("pinned", { pin });
     return pin;
   }
   async function unpinMessage(pinId, platform, conversationId) {
     const ok = await removeFromCollection(platform, conversationId, DATA_TYPES.PIN, pinId);
     if (ok) {
       console.log(`[LM-Source][PinService] Unpinned pin ${pinId}`);
-      _notify$1("unpinned", { pinId, platform, conversationId });
+      _notify$2("unpinned", { pinId, platform, conversationId });
     }
     return ok;
   }
@@ -1753,7 +1764,7 @@
     }).filter(Boolean);
     const ok = await setCollection(platform, conversationId, DATA_TYPES.PIN, reordered);
     if (ok) {
-      _notify$1("reordered", { platform, conversationId, orderedPinIds });
+      _notify$2("reordered", { platform, conversationId, orderedPinIds });
     }
     return ok;
   }
@@ -1768,7 +1779,7 @@
     offPinsChanged
   });
   const TOOLBAR_ID = "lms-msg-toolbar";
-  const STYLE_ID$2 = "lms-toolbar-styles";
+  const STYLE_ID$3 = "lms-toolbar-styles";
   const DATA_MSG_ID = "data-lms-msg-id";
   const DATA_ROLE = "data-lms-role";
   const TOOLBAR_OFFSET_Y = 6;
@@ -1873,9 +1884,9 @@
     return document.getElementById(TOOLBAR_ID);
   }
   function createToolbar() {
-    if (document.getElementById(STYLE_ID$2)) return;
+    if (document.getElementById(STYLE_ID$3)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$2;
+    style.id = STYLE_ID$3;
     style.textContent = buildStyles$1();
     document.head.appendChild(style);
     const toolbar = document.createElement("div");
@@ -1991,7 +2002,7 @@
   function destroy() {
     var _a, _b;
     (_a = document.getElementById(TOOLBAR_ID)) == null ? void 0 : _a.remove();
-    (_b = document.getElementById(STYLE_ID$2)) == null ? void 0 : _b.remove();
+    (_b = document.getElementById(STYLE_ID$3)) == null ? void 0 : _b.remove();
     _actions.clear();
     clearTimeout(_hideTimer);
   }
@@ -2005,7 +2016,7 @@
   };
   const PANEL_ID = "lms-pinboard-panel";
   const TOGGLE_BTN_ID = "lms-pinboard-toggle";
-  const STYLE_ID$1 = "lms-pinboard-styles";
+  const STYLE_ID$2 = "lms-pinboard-styles";
   const Z_INDEX = "2147483635";
   const ROLE_COLORS = {
     user: "#60a5fa",
@@ -2480,9 +2491,9 @@
       _pins = pins;
       _onUnpin = onUnpin || null;
       _onReorder = onReorder || null;
-      if (!document.getElementById(STYLE_ID$1)) {
+      if (!document.getElementById(STYLE_ID$2)) {
         const style = document.createElement("style");
-        style.id = STYLE_ID$1;
+        style.id = STYLE_ID$2;
         style.textContent = buildStyles();
         document.head.appendChild(style);
       }
@@ -2581,7 +2592,7 @@
       var _a, _b, _c;
       (_a = document.getElementById(PANEL_ID)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$1)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$2)) == null ? void 0 : _c.remove();
       _pins = [];
     },
     get isOpen() {
@@ -2594,11 +2605,11 @@
   };
   const HIDDEN_CLASS = "lms-deleted-hidden";
   const REVEALED_CLASS = "lms-deleted-revealed";
-  const STYLE_ID = "lms-delete-styles";
-  function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  const STYLE_ID$1 = "lms-delete-styles";
+  function ensureStyles$1() {
+    if (document.getElementById(STYLE_ID$1)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID;
+    style.id = STYLE_ID$1;
     style.textContent = `
 /* LM-Source — soft-deleted message state */
 
@@ -2710,9 +2721,9 @@
 `;
     document.head.appendChild(style);
   }
-  const _listeners = /* @__PURE__ */ new Set();
-  function _notify(event, detail) {
-    _listeners.forEach((cb) => {
+  const _listeners$1 = /* @__PURE__ */ new Set();
+  function _notify$1(event, detail) {
+    _listeners$1.forEach((cb) => {
       try {
         cb(event, detail);
       } catch (e) {
@@ -2721,10 +2732,10 @@
     });
   }
   function onDeletedChanged(cb) {
-    _listeners.add(cb);
+    _listeners$1.add(cb);
   }
   function offDeletedChanged(cb) {
-    _listeners.delete(cb);
+    _listeners$1.delete(cb);
   }
   let _showDeleted = false;
   function setDeletedVisible(visible) {
@@ -2732,15 +2743,15 @@
     document.querySelectorAll(`.${HIDDEN_CLASS}`).forEach((el) => {
       el.classList.toggle(REVEALED_CLASS, visible);
     });
-    _notify("visibilityChanged", { visible });
+    _notify$1("visibilityChanged", { visible });
   }
   function getDeletedVisible() {
     return _showDeleted;
   }
-  async function _loadRecords(platform, conversationId) {
+  async function _loadRecords$1(platform, conversationId) {
     return getCollection(platform, conversationId, DATA_TYPES.DELETED);
   }
-  async function _saveRecords(platform, conversationId, records) {
+  async function _saveRecords$1(platform, conversationId, records) {
     return setCollection(platform, conversationId, DATA_TYPES.DELETED, records);
   }
   function _findElement(messageId) {
@@ -2754,64 +2765,64 @@
     el.classList.remove(HIDDEN_CLASS, REVEALED_CLASS);
   }
   async function softDeleteMessage(messageId, platform, conversationId) {
-    ensureStyles();
-    const records = await _loadRecords(platform, conversationId);
+    ensureStyles$1();
+    const records = await _loadRecords$1(platform, conversationId);
     if (records.find((r) => r.messageId === messageId)) {
       return records.find((r) => r.messageId === messageId);
     }
     const record = createDeletedMessage({ platform, conversationId, messageId });
     records.push(record);
-    await _saveRecords(platform, conversationId, records);
+    await _saveRecords$1(platform, conversationId, records);
     const el = _findElement(messageId);
     if (el) _hideElement(el);
     console.log(`[LM-Source][DeleteService] Soft-deleted message ${messageId}`);
-    _notify("deleted", { messageId, platform, conversationId });
+    _notify$1("deleted", { messageId, platform, conversationId });
     return record;
   }
   async function restoreMessage(messageId, platform, conversationId) {
-    const records = await _loadRecords(platform, conversationId);
+    const records = await _loadRecords$1(platform, conversationId);
     const updated = records.filter((r) => r.messageId !== messageId);
     if (updated.length === records.length) return false;
-    await _saveRecords(platform, conversationId, updated);
+    await _saveRecords$1(platform, conversationId, updated);
     const el = _findElement(messageId);
     if (el) _showElement(el);
     console.log(`[LM-Source][DeleteService] Restored message ${messageId}`);
-    _notify("restored", { messageId, platform, conversationId });
+    _notify$1("restored", { messageId, platform, conversationId });
     return true;
   }
   async function isDeleted(messageId, platform, conversationId) {
-    const records = await _loadRecords(platform, conversationId);
+    const records = await _loadRecords$1(platform, conversationId);
     return records.some((r) => r.messageId === messageId);
   }
   async function getDeletedIds(platform, conversationId) {
-    const records = await _loadRecords(platform, conversationId);
+    const records = await _loadRecords$1(platform, conversationId);
     return new Set(records.map((r) => r.messageId));
   }
   async function softDeleteBulk(messageIds, platform, conversationId) {
-    ensureStyles();
-    const records = await _loadRecords(platform, conversationId);
+    ensureStyles$1();
+    const records = await _loadRecords$1(platform, conversationId);
     const existingIds = new Set(records.map((r) => r.messageId));
     const newRecords = messageIds.filter((id) => !existingIds.has(id)).map((id) => createDeletedMessage({ platform, conversationId, messageId: id }));
-    await _saveRecords(platform, conversationId, [...records, ...newRecords]);
+    await _saveRecords$1(platform, conversationId, [...records, ...newRecords]);
     for (const id of messageIds) {
       const el = _findElement(id);
       if (el) _hideElement(el);
     }
     console.log(`[LM-Source][DeleteService] Bulk-deleted ${newRecords.length} message(s)`);
-    _notify("bulkDeleted", { messageIds, platform, conversationId });
+    _notify$1("bulkDeleted", { messageIds, platform, conversationId });
   }
   async function restoreAll(platform, conversationId) {
-    const records = await _loadRecords(platform, conversationId);
+    const records = await _loadRecords$1(platform, conversationId);
     for (const r of records) {
       const el = _findElement(r.messageId);
       if (el) _showElement(el);
     }
-    await _saveRecords(platform, conversationId, []);
+    await _saveRecords$1(platform, conversationId, []);
     console.log(`[LM-Source][DeleteService] Restored all ${records.length} deleted message(s)`);
-    _notify("restoredAll", { platform, conversationId });
+    _notify$1("restoredAll", { platform, conversationId });
   }
   async function applyDeletedState(adapterRef, platform, conversationId) {
-    ensureStyles();
+    ensureStyles$1();
     const deletedIds = await getDeletedIds(platform, conversationId);
     if (deletedIds.size === 0) return 0;
     let count = 0;
@@ -2836,7 +2847,7 @@
     _bulkMode = true;
     _bulkSelection = /* @__PURE__ */ new Set();
     _onBulkCommit = onCommit;
-    ensureStyles();
+    ensureStyles$1();
     document.body.classList.add("lms-bulk-mode");
     messageElements.forEach((el) => {
       const msgId = el.getAttribute("data-lms-msg-id");
@@ -2908,6 +2919,552 @@
     offDeletedChanged,
     HIDDEN_CLASS,
     REVEALED_CLASS
+  });
+  const MAX_HISTORY = 10;
+  const EDITED_CLASS = "lms-edited-msg";
+  const EDITING_CLASS = "lms-editing-active";
+  const STYLE_ID = "lms-edit-styles";
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = `
+/* LM-Source — edit service injected styles */
+
+/* Edited-message indicator chip */
+.lms-edit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 5px;
+  padding: 1px 7px;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+.lms-edit-badge:hover {
+  background: rgba(99, 102, 241, 0.18);
+}
+.lms-edit-badge .lms-revert-icon {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Edited message: subtle left border */
+.${EDITED_CLASS} {
+  border-left: 2px solid rgba(99, 102, 241, 0.4) !important;
+  padding-left: 6px !important;
+  border-radius: 3px;
+}
+
+/* Inline edit widget overlay */
+.lms-edit-overlay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0;
+  z-index: 10;
+}
+
+.lms-edit-textarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 60vh;
+  background: rgba(10, 12, 20, 0.95);
+  border: 1.5px solid rgba(99, 102, 241, 0.5);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.lms-edit-textarea:focus {
+  border-color: rgba(99, 102, 241, 0.75);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.lms-edit-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lms-edit-btn {
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lms-edit-btn.save {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
+.lms-edit-btn.save:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed); transform: translateY(-1px); }
+.lms-edit-btn.cancel {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #94a3b8;
+}
+.lms-edit-btn.cancel:hover { background: rgba(255,255,255,0.1); }
+.lms-edit-btn.revert {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #f87171;
+}
+.lms-edit-btn.revert:hover { background: rgba(239,68,68,0.14); }
+
+.lms-edit-charcount {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: #4b5563;
+}
+
+/* History dropdown */
+.lms-edit-history-btn {
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 7px;
+  color: #818cf8;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: background 0.15s;
+}
+.lms-edit-history-btn:hover { background: rgba(99,102,241,0.15); }
+
+.lms-edit-history-list {
+  background: rgba(15,17,27,0.97);
+  border: 1px solid rgba(99,102,241,0.22);
+  border-radius: 8px;
+  padding: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.lms-edit-history-item {
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.12s;
+}
+.lms-edit-history-item:hover { background: rgba(99,102,241,0.1); color: #e2e8f0; }
+.lms-edit-history-ts {
+  font-size: 10px;
+  color: #4b5563;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.lms-edit-history-preview {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+`;
+    document.head.appendChild(style);
+  }
+  const _listeners = /* @__PURE__ */ new Set();
+  function _notify(event, detail) {
+    _listeners.forEach((cb) => {
+      try {
+        cb(event, detail);
+      } catch (e) {
+      }
+    });
+  }
+  function onEditChanged(cb) {
+    _listeners.add(cb);
+  }
+  function offEditChanged(cb) {
+    _listeners.delete(cb);
+  }
+  async function _loadRecords(platform, conversationId) {
+    return getCollection(platform, conversationId, DATA_TYPES.EDIT);
+  }
+  async function _saveRecords(platform, conversationId, records) {
+    return setCollection(platform, conversationId, DATA_TYPES.EDIT, records);
+  }
+  function _getContentNode(el) {
+    return el.querySelector('.markdown-content, .message-content, [class*="prose"], .model-response-text, [class*="content"]') || el;
+  }
+  function _getDisplayText(el) {
+    const node = _getContentNode(el);
+    const clone = node.cloneNode(true);
+    clone.querySelectorAll(".lms-edit-badge, .lms-edit-overlay, [data-lms-injected]").forEach((n) => n.remove());
+    return (clone.innerText || clone.textContent || "").trim();
+  }
+  function _fmtDate(ts) {
+    return new Date(ts).toLocaleString(void 0, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+  function _applyBadge(el, record, onRevertClick, onHistoryClick) {
+    var _a;
+    (_a = el.querySelector(".lms-edit-badge")) == null ? void 0 : _a.remove();
+    const badge = document.createElement("span");
+    badge.className = "lms-edit-badge";
+    badge.dataset.lmsInjected = "1";
+    badge.setAttribute("title", `Edited ${_fmtDate(record.editedAt)} — click for options`);
+    badge.innerHTML = `<span class="lms-revert-icon">✎</span> Edited ${_fmtDate(record.editedAt)}`;
+    badge.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _showBadgeMenu(badge, record, onRevertClick, onHistoryClick);
+    });
+    const node = _getContentNode(el);
+    node.appendChild(badge);
+  }
+  function _showBadgeMenu(badge, record, onRevertClick, onHistoryClick) {
+    document.querySelectorAll(".lms-badge-menu").forEach((m) => m.remove());
+    const menu = document.createElement("div");
+    menu.className = "lms-badge-menu";
+    menu.dataset.lmsInjected = "1";
+    Object.assign(menu.style, {
+      position: "absolute",
+      zIndex: "2147483632",
+      background: "rgba(15,17,27,0.97)",
+      border: "1px solid rgba(99,102,241,0.25)",
+      borderRadius: "8px",
+      padding: "4px",
+      minWidth: "160px",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+      fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif"
+    });
+    const items = [
+      { icon: "↩", label: "Revert to original", action: onRevertClick },
+      { icon: "📋", label: "Copy current text", action: () => navigator.clipboard.writeText(record.editedText) },
+      { icon: "🕓", label: "Edit history", action: onHistoryClick }
+    ];
+    for (const item of items) {
+      const btn = document.createElement("button");
+      Object.assign(btn.style, {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        width: "100%",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "6px 10px",
+        borderRadius: "5px",
+        fontSize: "12px",
+        color: "#94a3b8",
+        textAlign: "left",
+        transition: "background 0.12s"
+      });
+      btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+      btn.addEventListener("mouseover", () => {
+        btn.style.background = "rgba(99,102,241,0.12)";
+        btn.style.color = "#e2e8f0";
+      });
+      btn.addEventListener("mouseout", () => {
+        btn.style.background = "none";
+        btn.style.color = "#94a3b8";
+      });
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.remove();
+        item.action();
+      });
+      menu.appendChild(btn);
+    }
+    const bRect = badge.getBoundingClientRect();
+    menu.style.top = `${bRect.bottom + 4 + window.scrollY}px`;
+    menu.style.left = `${bRect.left + window.scrollX}px`;
+    document.body.appendChild(menu);
+    const onOutside = (e) => {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener("click", onOutside);
+      }
+    };
+    setTimeout(() => document.addEventListener("click", onOutside), 0);
+  }
+  function _showEditor(el, messageId, platform, conversationId, initialText, originalText, history2, onSave, onCancel) {
+    ensureStyles();
+    if (el.querySelector(".lms-edit-overlay")) return;
+    el.classList.add(EDITING_CLASS);
+    const node = _getContentNode(el);
+    const overlay = document.createElement("div");
+    overlay.className = "lms-edit-overlay";
+    overlay.dataset.lmsInjected = "1";
+    const textarea = document.createElement("textarea");
+    textarea.className = "lms-edit-textarea";
+    textarea.value = initialText;
+    textarea.setAttribute("aria-label", "Edit message text");
+    textarea.setAttribute("spellcheck", "true");
+    const charCount = document.createElement("span");
+    charCount.className = "lms-edit-charcount";
+    charCount.textContent = `${initialText.length} chars`;
+    textarea.addEventListener("input", () => {
+      charCount.textContent = `${textarea.value.length} chars`;
+    });
+    const toolbarRow = document.createElement("div");
+    toolbarRow.className = "lms-edit-toolbar";
+    const saveBtn = _makeEditBtn("✓ Save", "save");
+    const cancelBtn = _makeEditBtn("✕ Cancel", "cancel");
+    saveBtn.addEventListener("click", () => {
+      const newText = textarea.value.trim();
+      if (!newText) return;
+      _destroyEditor(el, overlay);
+      onSave(newText);
+    });
+    cancelBtn.addEventListener("click", () => {
+      _destroyEditor(el, overlay);
+      onCancel();
+    });
+    textarea.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        saveBtn.click();
+      }
+      if (e.key === "Escape") {
+        cancelBtn.click();
+      }
+    });
+    if (history2 && history2.length > 0) {
+      const histBtn = document.createElement("button");
+      histBtn.className = "lms-edit-history-btn";
+      histBtn.textContent = `🕓 History (${history2.length})`;
+      histBtn.addEventListener("click", () => _showHistoryDropdown(histBtn, history2, (text) => {
+        textarea.value = text;
+        textarea.dispatchEvent(new Event("input"));
+      }));
+      toolbarRow.append(saveBtn, cancelBtn, histBtn, charCount);
+    } else {
+      toolbarRow.append(saveBtn, cancelBtn, charCount);
+    }
+    if (originalText !== null) {
+      const revertBtn = _makeEditBtn("↩ Revert to Original", "revert");
+      revertBtn.addEventListener("click", () => {
+        _destroyEditor(el, overlay);
+        onSave("__REVERT__");
+      });
+      toolbarRow.appendChild(revertBtn);
+    }
+    overlay.append(textarea, toolbarRow);
+    node.prepend(overlay);
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.select();
+    });
+  }
+  function _makeEditBtn(label, variant) {
+    const btn = document.createElement("button");
+    btn.className = `lms-edit-btn ${variant}`;
+    btn.textContent = label;
+    return btn;
+  }
+  function _destroyEditor(el, overlay) {
+    overlay == null ? void 0 : overlay.remove();
+    el.classList.remove(EDITING_CLASS);
+  }
+  function _showHistoryDropdown(anchor, history2, onSelect) {
+    document.querySelectorAll(".lms-edit-history-list").forEach((l) => l.remove());
+    const list = document.createElement("div");
+    list.className = "lms-edit-history-list";
+    list.dataset.lmsInjected = "1";
+    Object.assign(list.style, {
+      position: "absolute",
+      zIndex: "2147483631"
+    });
+    [...history2].reverse().forEach((entry) => {
+      const item = document.createElement("div");
+      item.className = "lms-edit-history-item";
+      item.innerHTML = `
+      <span class="lms-edit-history-ts">${_fmtDate(entry.savedAt)}</span>
+      <span class="lms-edit-history-preview">${entry.text.slice(0, 80).replace(/</g, "&lt;")}</span>
+    `;
+      item.addEventListener("click", () => {
+        list.remove();
+        onSelect(entry.text);
+      });
+      list.appendChild(item);
+    });
+    const aRect = anchor.getBoundingClientRect();
+    list.style.top = `${aRect.bottom + 4 + window.scrollY}px`;
+    list.style.left = `${aRect.left + window.scrollX}px`;
+    document.body.appendChild(list);
+    const onOutside = (e) => {
+      if (!list.contains(e.target)) {
+        list.remove();
+        document.removeEventListener("click", onOutside);
+      }
+    };
+    setTimeout(() => document.addEventListener("click", onOutside), 0);
+  }
+  async function saveEdit(messageId, newText, originalText, platform, conversationId, el) {
+    var _a;
+    const records = await _loadRecords(platform, conversationId);
+    const idx = records.findIndex((r) => r.messageId === messageId);
+    if (newText === "__REVERT__") {
+      if (idx !== -1) {
+        const record = records[idx];
+        records.splice(idx, 1);
+        await _saveRecords(platform, conversationId, records);
+        if (el) {
+          const node = _getContentNode(el);
+          (_a = node.querySelector(".lms-edit-badge")) == null ? void 0 : _a.remove();
+          el.classList.remove(EDITED_CLASS);
+          const existingContent = node.querySelector("[data-lms-edited-text]");
+          if (existingContent) {
+            existingContent.removeAttribute("data-lms-edited-text");
+            existingContent.textContent = record.originalText;
+          }
+        }
+        _notify("reverted", { messageId, platform, conversationId });
+      }
+      return null;
+    }
+    const now = Date.now();
+    if (idx !== -1) {
+      const record = records[idx];
+      const histEntry = { text: record.editedText, savedAt: record.editedAt };
+      const history2 = record.history || [];
+      history2.push(histEntry);
+      if (history2.length > MAX_HISTORY) history2.shift();
+      records[idx] = { ...record, editedText: newText, editedAt: now, history: history2 };
+      await _saveRecords(platform, conversationId, records);
+      _applyEditToDOM(el, records[idx]);
+      _notify("updated", { record: records[idx] });
+      return records[idx];
+    } else {
+      const record = createEdit({
+        platform,
+        conversationId,
+        messageId,
+        originalText,
+        editedText: newText
+      });
+      record.history = [];
+      records.push(record);
+      await _saveRecords(platform, conversationId, records);
+      _applyEditToDOM(el, record);
+      _notify("created", { record });
+      return record;
+    }
+  }
+  async function revertEdit(messageId, platform, conversationId, el) {
+    return !!await saveEdit(messageId, "__REVERT__", null, platform, conversationId, el);
+  }
+  async function getEdit(messageId, platform, conversationId) {
+    const records = await _loadRecords(platform, conversationId);
+    return records.find((r) => r.messageId === messageId) || null;
+  }
+  async function hasEdit(messageId, platform, conversationId) {
+    return !!await getEdit(messageId, platform, conversationId);
+  }
+  function _applyEditToDOM(el, record) {
+    if (!el) return;
+    ensureStyles();
+    el.classList.add(EDITED_CLASS);
+    const node = _getContentNode(el);
+    let textNode = node.querySelector("[data-lms-edited-text]");
+    if (!textNode) {
+      textNode = document.createElement("div");
+      textNode.dataset.lmsEditedText = "1";
+      while (node.firstChild && node.firstChild !== textNode) {
+        textNode.appendChild(node.firstChild);
+      }
+      node.insertBefore(textNode, node.firstChild);
+    }
+    textNode.textContent = record.editedText;
+    _applyBadge(
+      el,
+      record,
+      () => {
+        revertEdit(record.messageId, record.platform, record.conversationId, el).then(() => console.log(`[LM-Source][EditService] Reverted ${record.messageId}`));
+      },
+      () => {
+        var _a;
+        const badge = el.querySelector(".lms-edit-badge");
+        if (badge && ((_a = record.history) == null ? void 0 : _a.length)) {
+          _showHistoryDropdown(badge, record.history, (text) => {
+            openEditor(el, record.messageId, record.platform, record.conversationId);
+          });
+        }
+      }
+    );
+  }
+  async function applyEditsToDOM(adapterRef, platform, conversationId) {
+    ensureStyles();
+    const records = await _loadRecords(platform, conversationId);
+    if (records.length === 0) return 0;
+    const idMap = new Map(records.map((r) => [r.messageId, r]));
+    const elements = adapterRef.getMessageElements();
+    let count = 0;
+    elements.forEach((el, idx) => {
+      const data = adapterRef.extractMessageData(el, idx);
+      if (!data) return;
+      const record = idMap.get(data.messageId);
+      if (record) {
+        _applyEditToDOM(el, record);
+        count++;
+      }
+    });
+    console.log(`[LM-Source][EditService] Re-applied ${count} edit(s) after page load`);
+    return count;
+  }
+  async function openEditor(el, messageId, platform, conversationId) {
+    ensureStyles();
+    const existingRecord = await getEdit(messageId, platform, conversationId);
+    const originalText = existingRecord ? existingRecord.originalText : _getDisplayText(el);
+    const currentText = existingRecord ? existingRecord.editedText : originalText;
+    const history2 = (existingRecord == null ? void 0 : existingRecord.history) || [];
+    _showEditor(
+      el,
+      messageId,
+      platform,
+      conversationId,
+      currentText,
+      existingRecord ? originalText : null,
+      // null = no prior edit → no revert btn
+      history2,
+      async (newText) => {
+        await saveEdit(messageId, newText, originalText, platform, conversationId, el);
+        console.log(`[LM-Source][EditService] Saved edit for ${messageId}`);
+      },
+      () => {
+        console.log(`[LM-Source][EditService] Edit cancelled for ${messageId}`);
+      }
+    );
+  }
+  const EditService = Object.freeze({
+    saveEdit,
+    revertEdit,
+    getEdit,
+    hasEdit,
+    openEditor,
+    applyEditsToDOM,
+    onEditChanged,
+    offEditChanged,
+    EDITED_CLASS
   });
   const LOG_PREFIX = "[LM-Source]";
   const DEBOUNCE_MS = 400;
@@ -3012,6 +3569,21 @@
       }
       return true;
     }
+    if ((request == null ? void 0 : request.type) === "LMS_REVERT_EDIT") {
+      if (!adapter) {
+        sendResponse({ success: false });
+        return true;
+      }
+      const { messageId } = request;
+      const platform = adapter.getPlatformIdentifier();
+      const conversationId = adapter.getConversationId();
+      const el = document.querySelector(`[data-lms-msg-id="${messageId}"]`);
+      EditService.revertEdit(messageId, platform, conversationId, el).then(() => sendResponse({ success: true })).catch((e) => {
+        console.error(`${LOG_PREFIX} Failed to revert edit:`, e);
+        sendResponse({ success: false });
+      });
+      return true;
+    }
     return false;
   });
   document.addEventListener("lms:adapterReady", (e) => {
@@ -3026,6 +3598,7 @@
     }, 1500);
     initPinFeature(readyAdapter, platform, conversationId);
     initDeleteFeature(readyAdapter, platform, conversationId);
+    initEditFeature(readyAdapter, platform, conversationId);
   });
   document.addEventListener("lms:messageAdded", (e) => {
     const { messageId, role, element } = e.detail;
@@ -3255,6 +3828,24 @@
         console.log(`${LOG_PREFIX} Restored hidden state for ${count} deleted message(s).`);
       }
     }, 2e3);
+  }
+  async function initEditFeature(adapterRef, platform, conversationId) {
+    MessageToolbar.registerAction("edit", {
+      icon: "✎️",
+      tooltip: "Edit message (local only)",
+      showFor: ["all"],
+      groupBefore: false,
+      onClick: async ({ messageId, element }) => {
+        await EditService.openEditor(element, messageId, platform, conversationId);
+      }
+    });
+    setTimeout(async () => {
+      const count = await EditService.applyEditsToDOM(adapterRef, platform, conversationId);
+      if (count > 0) {
+        console.log(`${LOG_PREFIX} Re-applied ${count} local edit(s) after page load.`);
+      }
+    }, 2500);
+    console.log(`${LOG_PREFIX} Edit feature (P2.5) initialised.`);
   }
   window.addEventListener("beforeunload", () => {
     if (messageObserver) {

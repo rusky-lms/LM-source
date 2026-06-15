@@ -39,6 +39,7 @@
  * @property {string} originalText   - Verbatim original AI response
  * @property {string} editedText     - User's local replacement text
  * @property {number} editedAt       - Unix ms
+ * @property {Array<{text: string, savedAt: number}>} [history] - Edit history (max 10 entries)
  * @property {number} [_updatedAt]
  */
 

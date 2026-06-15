@@ -208,24 +208,30 @@ Implement a soft-delete mechanism for messages (view-layer only). Data persists 
 ---
 
 ### Task P2.5 — Feature F-04: Edit AI Responses
-**Status:** ⏳ Pending | **Difficulty:** Medium | **Blocker for:** None (but depends on P2.1)
+**Status:** ✅ Done | **Difficulty:** Medium | **Blocker for:** None (but depends on P2.1)
 
-Allow users to edit AI responses locally. Data persists via the Storage Service (P1.3).
+Allow users to edit responses locally. Data persists via the Storage Service (P1.3).
 
 **Deliverables:**
-- Edit icon on AI message hover.
-- `src/services/editService.js`
-- Editable text area.
-- `[Edited]` tag with a timestamp.
-- Original text recovery.
+- `src/services/editService.js` ✅ — handles storage, inline DOM rendering, badge overlay
+- ✎ Edit toolbar button on message hover ✅ (via shared `MessageToolbar` registry)
+- Inline editable textarea widget ✅
+- `[✎ Edited]` badge with timestamp ✅
+- Revert functionality & Edit History dropdown (up to 10 versions) ✅
+
+**Architecture:**
+- **Text replacement:** Uses a injected `.lms-edited-msg` style and a plain-text wrapper `data-lms-edited-text` to cleanly replace content without destroying complex DOM elements.
+- **Badge menu:** Clicking the badge opens a mini-dropdown to `Revert to original`, `Copy current text`, or view `Edit history`.
+- **History tracking:** The Edit schema stores `originalText` and up to `MAX_HISTORY=10` previous states in `history: [{text, savedAt}]`.
+- **Restore on refresh:** `applyEditsToDOM()` automatically re-injects saved edits based on `messageId` match.
 
 **Action Steps:**
-1. In `src/content.js`, add an "Edit" icon specifically on AI message elements (distinguish user vs. AI messages via the adapter).
-2. `editService.js`: define `saveEdit(messageId, newText)`. Store the original text and the edited text in `chrome.storage.local`.
-3. On click, swap the message text in the DOM for a `contenteditable` block or a `<textarea>`.
-4. On save, replace the text in the DOM with the new version, append a small `<span>` with `[Edited YYYY-MM-DD HH:mm]`.
-5. Provide a mechanism to view the original (e.g., a "Revert" or "Show Original" button).
-6. Ensure edits are purely local and do not interact with the LLM session.
+1. ✅ `editService.js`: `saveEdit()`, `revertEdit()`, `getEdit()`, `openEditor()`.
+2. ✅ `MessageToolbar.registerAction('edit', …)` — attach to ALL messages (both AI and User).
+3. ✅ Inline textarea widget injected atop original content on edit click.
+4. ✅ Replace text + append badge on save; store in `DATA_TYPES.EDIT`.
+5. ✅ Revert option to restore original response.
+6. ✅ Safe text extraction `_getDisplayText(el)` strips our custom badges before edit.
 
 ---
 

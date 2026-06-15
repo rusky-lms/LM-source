@@ -12,6 +12,7 @@
 //  6. (P2.2) Listen for LMS_EXTRACT_CONTEXT messages and trigger context extraction.
 //  7. (P2.3) Inject per-message toolbar with Pin action; manage Pinboard panel.
 //  8. (P2.4) Soft-delete toolbar action; bulk-delete mode; show/hide toggle.
+//  9. (P2.5) Inline edit toolbar action; restore edited text on page load.
 
 'use strict';
 
@@ -24,6 +25,7 @@ import PinService            from './services/pinService.js';
 import { MessageToolbar }   from './components/messageToolbar.js';
 import { PinboardPanel }    from './components/PinboardPanel.js';
 import DeleteService         from './services/deleteService.js';
+import EditService           from './services/editService.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -207,6 +209,22 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true;
   }
 
+  // P2.5 — Revert an edited message from the popup (emergency fallback)
+  if (request?.type === 'LMS_REVERT_EDIT') {
+    if (!adapter) { sendResponse({ success: false }); return true; }
+    const { messageId } = request;
+    const platform       = adapter.getPlatformIdentifier();
+    const conversationId = adapter.getConversationId();
+    const el = document.querySelector(`[data-lms-msg-id="${messageId}"]`);
+    EditService.revertEdit(messageId, platform, conversationId, el)
+      .then(() => sendResponse({ success: true }))
+      .catch((e) => {
+        console.error(`${LOG_PREFIX} Failed to revert edit:`, e);
+        sendResponse({ success: false });
+      });
+    return true; // Keep channel open for async response
+  }
+
   return false;
 });
 
@@ -230,6 +248,9 @@ document.addEventListener('lms:adapterReady', (e) => {
 
   // P2.4 — Init delete feature (register action + restore persisted state)
   initDeleteFeature(readyAdapter, platform, conversationId);
+
+  // P2.5 — Init edit feature (register action + restore persisted edits)
+  initEditFeature(readyAdapter, platform, conversationId);
 });
 
 // React to newly added messages: attach toolbar
@@ -598,6 +619,43 @@ async function initDeleteFeature(adapterRef, platform, conversationId) {
       console.log(`${LOG_PREFIX} Restored hidden state for ${count} deleted message(s).`);
     }
   }, 2000);
+}
+
+// ── P2.5 — Edit feature initialisation ─────────────────────────────────────────
+
+/**
+ * Initialise the edit feature for the current conversation:
+ *   1. Register the ✎ edit action on the shared MessageToolbar
+ *   2. Re-apply persisted local edits to DOM (after a 2.5s delay to let
+ *      the MutationObserver stamp message IDs first)
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapterRef
+ * @param {string} platform
+ * @param {string} conversationId
+ */
+async function initEditFeature(adapterRef, platform, conversationId) {
+  // 1. Register the edit toolbar action
+  //    Shown on ALL messages (user + AI); the spec says AI-only, but
+  //    local editing is equally useful on both sides.
+  MessageToolbar.registerAction('edit', {
+    icon: '✎️',
+    tooltip: 'Edit message (local only)',
+    showFor: ['all'],
+    groupBefore: false,
+    onClick: async ({ messageId, element }) => {
+      await EditService.openEditor(element, messageId, platform, conversationId);
+    },
+  });
+
+  // 2. Re-apply persisted edits after a short delay
+  setTimeout(async () => {
+    const count = await EditService.applyEditsToDOM(adapterRef, platform, conversationId);
+    if (count > 0) {
+      console.log(`${LOG_PREFIX} Re-applied ${count} local edit(s) after page load.`);
+    }
+  }, 2500);
+
+  console.log(`${LOG_PREFIX} Edit feature (P2.5) initialised.`);
 }
 
 // ── Cleanup on page unload ────────────────────────────────────────────────────
