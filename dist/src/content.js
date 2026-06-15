@@ -832,22 +832,22 @@
     );
     return ctx;
   }
-  const PANEL_ID$1 = "lms-context-panel";
+  const PANEL_ID$2 = "lms-context-panel";
   const TOGGLE_BTN_ID$1 = "lms-context-toggle-btn";
-  const STYLE_ID$4 = "lms-context-styles";
+  const STYLE_ID$6 = "lms-context-styles";
   const PANEL_WIDTH = "400px";
-  const Z_INDEX$1 = "2147483640";
+  const Z_INDEX$2 = "2147483640";
   const PLATFORM_LABELS = {
     claude: "🟣 Claude.ai",
     chatgpt: "🟢 ChatGPT",
     gemini: "🔵 Google Gemini",
     unknown: "❓ Unknown"
   };
-  function buildStyles$2() {
+  function buildStyles$3() {
     return `
 /* ── LM-Source Context Panel — Injected Styles ── */
 
-#${PANEL_ID$1} {
+#${PANEL_ID$2} {
   position: fixed;
   top: 0;
   right: 0;
@@ -858,7 +858,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.6;
-  z-index: ${Z_INDEX$1};
+  z-index: ${Z_INDEX$2};
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 32px rgba(0, 0, 0, 0.6);
@@ -868,7 +868,7 @@
   overflow: hidden;
 }
 
-#${PANEL_ID$1}.lms-panel-open {
+#${PANEL_ID$2}.lms-panel-open {
   transform: translateX(0);
 }
 
@@ -1223,7 +1223,7 @@
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  z-index: ${Number(Z_INDEX$1) - 1};
+  z-index: ${Number(Z_INDEX$2) - 1};
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
   border: none;
@@ -1272,7 +1272,7 @@
 .lms-refresh-btn:hover { background: rgba(99,102,241,0.1); }
 `;
   }
-  const getPanel$1 = () => document.getElementById(PANEL_ID$1);
+  const getPanel$1 = () => document.getElementById(PANEL_ID$2);
   function esc$1(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
@@ -1480,16 +1480,16 @@
      */
     render(ctx, { onRefresh } = {}) {
       _onRefresh = onRefresh || null;
-      if (!document.getElementById(STYLE_ID$4)) {
+      if (!document.getElementById(STYLE_ID$6)) {
         const styleEl = document.createElement("style");
-        styleEl.id = STYLE_ID$4;
-        styleEl.textContent = buildStyles$2();
+        styleEl.id = STYLE_ID$6;
+        styleEl.textContent = buildStyles$3();
         document.head.appendChild(styleEl);
       }
       let panel = getPanel$1();
       if (!panel) {
         panel = document.createElement("div");
-        panel.id = PANEL_ID$1;
+        panel.id = PANEL_ID$2;
         panel.setAttribute("role", "complementary");
         panel.setAttribute("aria-label", "LM-Source Context Panel");
         document.body.appendChild(panel);
@@ -1523,9 +1523,9 @@
     /** Remove the panel and its toggle button from the DOM entirely. */
     destroy() {
       var _a, _b, _c;
-      (_a = document.getElementById(PANEL_ID$1)) == null ? void 0 : _a.remove();
+      (_a = document.getElementById(PANEL_ID$2)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID$1)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$4)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$6)) == null ? void 0 : _c.remove();
     },
     /** True if the panel currently exists in the DOM. */
     get isRendered() {
@@ -1646,6 +1646,31 @@
       order
     };
   }
+  function createHighlight({
+    platform,
+    conversationId,
+    messageId,
+    text,
+    color,
+    startPath = "",
+    startOffset = 0,
+    endPath = "",
+    endOffset = 0
+  }) {
+    return {
+      id: _generateId(),
+      platform,
+      conversationId,
+      messageId,
+      text,
+      color,
+      startPath,
+      startOffset,
+      endPath,
+      endOffset,
+      createdAt: Date.now()
+    };
+  }
   function createEdit({ platform, conversationId, messageId, originalText, editedText }) {
     return {
       id: _generateId(),
@@ -1698,9 +1723,9 @@
     }
     return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   }
-  const _listeners$2 = /* @__PURE__ */ new Set();
-  function _notify$2(event, detail) {
-    _listeners$2.forEach((cb) => {
+  const _listeners$3 = /* @__PURE__ */ new Set();
+  function _notify$3(event, detail) {
+    _listeners$3.forEach((cb) => {
       try {
         cb(event, detail);
       } catch (e) {
@@ -1709,10 +1734,10 @@
     });
   }
   function onPinsChanged(cb) {
-    _listeners$2.add(cb);
+    _listeners$3.add(cb);
   }
   function offPinsChanged(cb) {
-    _listeners$2.delete(cb);
+    _listeners$3.delete(cb);
   }
   async function pinMessage(messageData) {
     const { messageId, platform, conversationId, role, text } = messageData;
@@ -1724,14 +1749,14 @@
       throw new Error(`[LM-Source][PinService] Failed to save pin for message ${messageId}`);
     }
     console.log(`[LM-Source][PinService] Pinned message ${messageId} (order ${order})`);
-    _notify$2("pinned", { pin });
+    _notify$3("pinned", { pin });
     return pin;
   }
   async function unpinMessage(pinId, platform, conversationId) {
     const ok = await removeFromCollection(platform, conversationId, DATA_TYPES.PIN, pinId);
     if (ok) {
       console.log(`[LM-Source][PinService] Unpinned pin ${pinId}`);
-      _notify$2("unpinned", { pinId, platform, conversationId });
+      _notify$3("unpinned", { pinId, platform, conversationId });
     }
     return ok;
   }
@@ -1764,7 +1789,7 @@
     }).filter(Boolean);
     const ok = await setCollection(platform, conversationId, DATA_TYPES.PIN, reordered);
     if (ok) {
-      _notify$2("reordered", { platform, conversationId, orderedPinIds });
+      _notify$3("reordered", { platform, conversationId, orderedPinIds });
     }
     return ok;
   }
@@ -1778,15 +1803,15 @@
     onPinsChanged,
     offPinsChanged
   });
-  const TOOLBAR_ID = "lms-msg-toolbar";
-  const STYLE_ID$3 = "lms-toolbar-styles";
+  const TOOLBAR_ID$1 = "lms-msg-toolbar";
+  const STYLE_ID$5 = "lms-toolbar-styles";
   const DATA_MSG_ID = "data-lms-msg-id";
   const DATA_ROLE = "data-lms-role";
   const TOOLBAR_OFFSET_Y = 6;
   const TOOLBAR_OFFSET_X = 8;
-  function buildStyles$1() {
+  function buildStyles$2() {
     return `
-#${TOOLBAR_ID} {
+#${TOOLBAR_ID$1} {
   position: fixed;
   z-index: 2147483630;
   display: none;
@@ -1804,7 +1829,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-#${TOOLBAR_ID}.lms-tb-visible {
+#${TOOLBAR_ID$1}.lms-tb-visible {
   display: flex;
 }
 
@@ -1881,16 +1906,16 @@
   let _currentEl = null;
   let _hideTimer = null;
   function getToolbar() {
-    return document.getElementById(TOOLBAR_ID);
+    return document.getElementById(TOOLBAR_ID$1);
   }
-  function createToolbar() {
-    if (document.getElementById(STYLE_ID$3)) return;
+  function createToolbar$1() {
+    if (document.getElementById(STYLE_ID$5)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$3;
-    style.textContent = buildStyles$1();
+    style.id = STYLE_ID$5;
+    style.textContent = buildStyles$2();
     document.head.appendChild(style);
     const toolbar = document.createElement("div");
-    toolbar.id = TOOLBAR_ID;
+    toolbar.id = TOOLBAR_ID$1;
     toolbar.setAttribute("role", "toolbar");
     toolbar.setAttribute("aria-label", "LM-Source message actions");
     document.body.appendChild(toolbar);
@@ -1948,7 +1973,7 @@
       toolbar.appendChild(btn);
     }
   }
-  function showToolbar() {
+  function showToolbar$1() {
     var _a;
     clearTimeout(_hideTimer);
     (_a = getToolbar()) == null ? void 0 : _a.classList.add("lms-tb-visible");
@@ -1971,7 +1996,7 @@
       _currentEl = el;
       const pinnedSet = typeof getPinnedSet === "function" ? await getPinnedSet() : /* @__PURE__ */ new Map();
       renderToolbar(role, messageId, pinnedSet);
-      showToolbar();
+      showToolbar$1();
       positionOver(el);
     });
     el.addEventListener("mousemove", () => {
@@ -1996,38 +2021,38 @@
   function unregisterAction(id) {
     _actions.delete(id);
   }
-  function init$1() {
-    createToolbar();
+  function init$2() {
+    createToolbar$1();
   }
-  function destroy() {
+  function destroy$2() {
     var _a, _b;
-    (_a = document.getElementById(TOOLBAR_ID)) == null ? void 0 : _a.remove();
-    (_b = document.getElementById(STYLE_ID$3)) == null ? void 0 : _b.remove();
+    (_a = document.getElementById(TOOLBAR_ID$1)) == null ? void 0 : _a.remove();
+    (_b = document.getElementById(STYLE_ID$5)) == null ? void 0 : _b.remove();
     _actions.clear();
     clearTimeout(_hideTimer);
   }
   const MessageToolbar = {
-    init: init$1,
-    destroy,
+    init: init$2,
+    destroy: destroy$2,
     registerAction,
     unregisterAction,
     attachToMessage,
     setMessagePinnedState
   };
-  const PANEL_ID = "lms-pinboard-panel";
+  const PANEL_ID$1 = "lms-pinboard-panel";
   const TOGGLE_BTN_ID = "lms-pinboard-toggle";
-  const STYLE_ID$2 = "lms-pinboard-styles";
-  const Z_INDEX = "2147483635";
+  const STYLE_ID$4 = "lms-pinboard-styles";
+  const Z_INDEX$1 = "2147483635";
   const ROLE_COLORS = {
     user: "#60a5fa",
     assistant: "#a78bfa",
     unknown: "#94a3b8"
   };
-  function buildStyles() {
+  function buildStyles$1() {
     return `
 /* ── LM-Source Pinboard Panel ── */
 
-#${PANEL_ID} {
+#${PANEL_ID$1} {
   position: fixed;
   top: 0;
   left: 0;
@@ -2038,7 +2063,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.55;
-  z-index: ${Z_INDEX};
+  z-index: ${Z_INDEX$1};
   display: flex;
   flex-direction: column;
   box-shadow: 4px 0 32px rgba(0, 0, 0, 0.55);
@@ -2047,7 +2072,7 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
-#${PANEL_ID}.lms-pb-open {
+#${PANEL_ID$1}.lms-pb-open {
   transform: translateX(0);
 }
 
@@ -2276,7 +2301,7 @@
   left: 0;
   top: calc(50% + 40px);
   transform: translateY(-50%);
-  z-index: ${Number(Z_INDEX) - 1};
+  z-index: ${Number(Z_INDEX$1) - 1};
   background: linear-gradient(135deg, #b45309, #d97706);
   color: #fff;
   border: none;
@@ -2300,7 +2325,7 @@
 }
 `;
   }
-  const getPanel = () => document.getElementById(PANEL_ID);
+  const getPanel = () => document.getElementById(PANEL_ID$1);
   function esc(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
@@ -2491,16 +2516,16 @@
       _pins = pins;
       _onUnpin = onUnpin || null;
       _onReorder = onReorder || null;
-      if (!document.getElementById(STYLE_ID$2)) {
+      if (!document.getElementById(STYLE_ID$4)) {
         const style = document.createElement("style");
-        style.id = STYLE_ID$2;
-        style.textContent = buildStyles();
+        style.id = STYLE_ID$4;
+        style.textContent = buildStyles$1();
         document.head.appendChild(style);
       }
       let panel = getPanel();
       if (!panel) {
         panel = document.createElement("div");
-        panel.id = PANEL_ID;
+        panel.id = PANEL_ID$1;
         panel.setAttribute("role", "complementary");
         panel.setAttribute("aria-label", "LM-Source Pinboard");
         document.body.appendChild(panel);
@@ -2590,9 +2615,9 @@
     /** Remove panel + toggle from DOM. */
     destroy() {
       var _a, _b, _c;
-      (_a = document.getElementById(PANEL_ID)) == null ? void 0 : _a.remove();
+      (_a = document.getElementById(PANEL_ID$1)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$2)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$4)) == null ? void 0 : _c.remove();
       _pins = [];
     },
     get isOpen() {
@@ -2605,11 +2630,11 @@
   };
   const HIDDEN_CLASS = "lms-deleted-hidden";
   const REVEALED_CLASS = "lms-deleted-revealed";
-  const STYLE_ID$1 = "lms-delete-styles";
-  function ensureStyles$1() {
-    if (document.getElementById(STYLE_ID$1)) return;
+  const STYLE_ID$3 = "lms-delete-styles";
+  function ensureStyles$4() {
+    if (document.getElementById(STYLE_ID$3)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$1;
+    style.id = STYLE_ID$3;
     style.textContent = `
 /* LM-Source — soft-deleted message state */
 
@@ -2721,9 +2746,9 @@
 `;
     document.head.appendChild(style);
   }
-  const _listeners$1 = /* @__PURE__ */ new Set();
-  function _notify$1(event, detail) {
-    _listeners$1.forEach((cb) => {
+  const _listeners$2 = /* @__PURE__ */ new Set();
+  function _notify$2(event, detail) {
+    _listeners$2.forEach((cb) => {
       try {
         cb(event, detail);
       } catch (e) {
@@ -2732,10 +2757,10 @@
     });
   }
   function onDeletedChanged(cb) {
-    _listeners$1.add(cb);
+    _listeners$2.add(cb);
   }
   function offDeletedChanged(cb) {
-    _listeners$1.delete(cb);
+    _listeners$2.delete(cb);
   }
   let _showDeleted = false;
   function setDeletedVisible(visible) {
@@ -2743,15 +2768,15 @@
     document.querySelectorAll(`.${HIDDEN_CLASS}`).forEach((el) => {
       el.classList.toggle(REVEALED_CLASS, visible);
     });
-    _notify$1("visibilityChanged", { visible });
+    _notify$2("visibilityChanged", { visible });
   }
   function getDeletedVisible() {
     return _showDeleted;
   }
-  async function _loadRecords$1(platform, conversationId) {
+  async function _loadRecords$2(platform, conversationId) {
     return getCollection(platform, conversationId, DATA_TYPES.DELETED);
   }
-  async function _saveRecords$1(platform, conversationId, records) {
+  async function _saveRecords$2(platform, conversationId, records) {
     return setCollection(platform, conversationId, DATA_TYPES.DELETED, records);
   }
   function _findElement(messageId) {
@@ -2765,64 +2790,64 @@
     el.classList.remove(HIDDEN_CLASS, REVEALED_CLASS);
   }
   async function softDeleteMessage(messageId, platform, conversationId) {
-    ensureStyles$1();
-    const records = await _loadRecords$1(platform, conversationId);
+    ensureStyles$4();
+    const records = await _loadRecords$2(platform, conversationId);
     if (records.find((r) => r.messageId === messageId)) {
       return records.find((r) => r.messageId === messageId);
     }
     const record = createDeletedMessage({ platform, conversationId, messageId });
     records.push(record);
-    await _saveRecords$1(platform, conversationId, records);
+    await _saveRecords$2(platform, conversationId, records);
     const el = _findElement(messageId);
     if (el) _hideElement(el);
     console.log(`[LM-Source][DeleteService] Soft-deleted message ${messageId}`);
-    _notify$1("deleted", { messageId, platform, conversationId });
+    _notify$2("deleted", { messageId, platform, conversationId });
     return record;
   }
   async function restoreMessage(messageId, platform, conversationId) {
-    const records = await _loadRecords$1(platform, conversationId);
+    const records = await _loadRecords$2(platform, conversationId);
     const updated = records.filter((r) => r.messageId !== messageId);
     if (updated.length === records.length) return false;
-    await _saveRecords$1(platform, conversationId, updated);
+    await _saveRecords$2(platform, conversationId, updated);
     const el = _findElement(messageId);
     if (el) _showElement(el);
     console.log(`[LM-Source][DeleteService] Restored message ${messageId}`);
-    _notify$1("restored", { messageId, platform, conversationId });
+    _notify$2("restored", { messageId, platform, conversationId });
     return true;
   }
   async function isDeleted(messageId, platform, conversationId) {
-    const records = await _loadRecords$1(platform, conversationId);
+    const records = await _loadRecords$2(platform, conversationId);
     return records.some((r) => r.messageId === messageId);
   }
   async function getDeletedIds(platform, conversationId) {
-    const records = await _loadRecords$1(platform, conversationId);
+    const records = await _loadRecords$2(platform, conversationId);
     return new Set(records.map((r) => r.messageId));
   }
   async function softDeleteBulk(messageIds, platform, conversationId) {
-    ensureStyles$1();
-    const records = await _loadRecords$1(platform, conversationId);
+    ensureStyles$4();
+    const records = await _loadRecords$2(platform, conversationId);
     const existingIds = new Set(records.map((r) => r.messageId));
     const newRecords = messageIds.filter((id) => !existingIds.has(id)).map((id) => createDeletedMessage({ platform, conversationId, messageId: id }));
-    await _saveRecords$1(platform, conversationId, [...records, ...newRecords]);
+    await _saveRecords$2(platform, conversationId, [...records, ...newRecords]);
     for (const id of messageIds) {
       const el = _findElement(id);
       if (el) _hideElement(el);
     }
     console.log(`[LM-Source][DeleteService] Bulk-deleted ${newRecords.length} message(s)`);
-    _notify$1("bulkDeleted", { messageIds, platform, conversationId });
+    _notify$2("bulkDeleted", { messageIds, platform, conversationId });
   }
   async function restoreAll(platform, conversationId) {
-    const records = await _loadRecords$1(platform, conversationId);
+    const records = await _loadRecords$2(platform, conversationId);
     for (const r of records) {
       const el = _findElement(r.messageId);
       if (el) _showElement(el);
     }
-    await _saveRecords$1(platform, conversationId, []);
+    await _saveRecords$2(platform, conversationId, []);
     console.log(`[LM-Source][DeleteService] Restored all ${records.length} deleted message(s)`);
-    _notify$1("restoredAll", { platform, conversationId });
+    _notify$2("restoredAll", { platform, conversationId });
   }
   async function applyDeletedState(adapterRef, platform, conversationId) {
-    ensureStyles$1();
+    ensureStyles$4();
     const deletedIds = await getDeletedIds(platform, conversationId);
     if (deletedIds.size === 0) return 0;
     let count = 0;
@@ -2847,7 +2872,7 @@
     _bulkMode = true;
     _bulkSelection = /* @__PURE__ */ new Set();
     _onBulkCommit = onCommit;
-    ensureStyles$1();
+    ensureStyles$4();
     document.body.classList.add("lms-bulk-mode");
     messageElements.forEach((el) => {
       const msgId = el.getAttribute("data-lms-msg-id");
@@ -2923,11 +2948,11 @@
   const MAX_HISTORY = 10;
   const EDITED_CLASS = "lms-edited-msg";
   const EDITING_CLASS = "lms-editing-active";
-  const STYLE_ID = "lms-edit-styles";
-  function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  const STYLE_ID$2 = "lms-edit-styles";
+  function ensureStyles$3() {
+    if (document.getElementById(STYLE_ID$2)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID;
+    style.id = STYLE_ID$2;
     style.textContent = `
 /* LM-Source — edit service injected styles */
 
@@ -3087,9 +3112,9 @@
 `;
     document.head.appendChild(style);
   }
-  const _listeners = /* @__PURE__ */ new Set();
-  function _notify(event, detail) {
-    _listeners.forEach((cb) => {
+  const _listeners$1 = /* @__PURE__ */ new Set();
+  function _notify$1(event, detail) {
+    _listeners$1.forEach((cb) => {
       try {
         cb(event, detail);
       } catch (e) {
@@ -3097,15 +3122,15 @@
     });
   }
   function onEditChanged(cb) {
-    _listeners.add(cb);
+    _listeners$1.add(cb);
   }
   function offEditChanged(cb) {
-    _listeners.delete(cb);
+    _listeners$1.delete(cb);
   }
-  async function _loadRecords(platform, conversationId) {
+  async function _loadRecords$1(platform, conversationId) {
     return getCollection(platform, conversationId, DATA_TYPES.EDIT);
   }
-  async function _saveRecords(platform, conversationId, records) {
+  async function _saveRecords$1(platform, conversationId, records) {
     return setCollection(platform, conversationId, DATA_TYPES.EDIT, records);
   }
   function _getContentNode(el) {
@@ -3207,7 +3232,7 @@
     setTimeout(() => document.addEventListener("click", onOutside), 0);
   }
   function _showEditor(el, messageId, platform, conversationId, initialText, originalText, history2, onSave, onCancel) {
-    ensureStyles();
+    ensureStyles$3();
     if (el.querySelector(".lms-edit-overlay")) return;
     el.classList.add(EDITING_CLASS);
     const node = _getContentNode(el);
@@ -3321,13 +3346,13 @@
   }
   async function saveEdit(messageId, newText, originalText, platform, conversationId, el) {
     var _a;
-    const records = await _loadRecords(platform, conversationId);
+    const records = await _loadRecords$1(platform, conversationId);
     const idx = records.findIndex((r) => r.messageId === messageId);
     if (newText === "__REVERT__") {
       if (idx !== -1) {
         const record = records[idx];
         records.splice(idx, 1);
-        await _saveRecords(platform, conversationId, records);
+        await _saveRecords$1(platform, conversationId, records);
         if (el) {
           const node = _getContentNode(el);
           (_a = node.querySelector(".lms-edit-badge")) == null ? void 0 : _a.remove();
@@ -3338,7 +3363,7 @@
             existingContent.textContent = record.originalText;
           }
         }
-        _notify("reverted", { messageId, platform, conversationId });
+        _notify$1("reverted", { messageId, platform, conversationId });
       }
       return null;
     }
@@ -3350,9 +3375,9 @@
       history2.push(histEntry);
       if (history2.length > MAX_HISTORY) history2.shift();
       records[idx] = { ...record, editedText: newText, editedAt: now, history: history2 };
-      await _saveRecords(platform, conversationId, records);
+      await _saveRecords$1(platform, conversationId, records);
       _applyEditToDOM(el, records[idx]);
-      _notify("updated", { record: records[idx] });
+      _notify$1("updated", { record: records[idx] });
       return records[idx];
     } else {
       const record = createEdit({
@@ -3364,9 +3389,9 @@
       });
       record.history = [];
       records.push(record);
-      await _saveRecords(platform, conversationId, records);
+      await _saveRecords$1(platform, conversationId, records);
       _applyEditToDOM(el, record);
-      _notify("created", { record });
+      _notify$1("created", { record });
       return record;
     }
   }
@@ -3374,7 +3399,7 @@
     return !!await saveEdit(messageId, "__REVERT__", null, platform, conversationId, el);
   }
   async function getEdit(messageId, platform, conversationId) {
-    const records = await _loadRecords(platform, conversationId);
+    const records = await _loadRecords$1(platform, conversationId);
     return records.find((r) => r.messageId === messageId) || null;
   }
   async function hasEdit(messageId, platform, conversationId) {
@@ -3382,7 +3407,7 @@
   }
   function _applyEditToDOM(el, record) {
     if (!el) return;
-    ensureStyles();
+    ensureStyles$3();
     el.classList.add(EDITED_CLASS);
     const node = _getContentNode(el);
     let textNode = node.querySelector("[data-lms-edited-text]");
@@ -3413,8 +3438,8 @@
     );
   }
   async function applyEditsToDOM(adapterRef, platform, conversationId) {
-    ensureStyles();
-    const records = await _loadRecords(platform, conversationId);
+    ensureStyles$3();
+    const records = await _loadRecords$1(platform, conversationId);
     if (records.length === 0) return 0;
     const idMap = new Map(records.map((r) => [r.messageId, r]));
     const elements = adapterRef.getMessageElements();
@@ -3432,7 +3457,7 @@
     return count;
   }
   async function openEditor(el, messageId, platform, conversationId) {
-    ensureStyles();
+    ensureStyles$3();
     const existingRecord = await getEdit(messageId, platform, conversationId);
     const originalText = existingRecord ? existingRecord.originalText : _getDisplayText(el);
     const currentText = existingRecord ? existingRecord.editedText : originalText;
@@ -3465,6 +3490,650 @@
     onEditChanged,
     offEditChanged,
     EDITED_CLASS
+  });
+  const STYLE_ID$1 = "lms-highlight-styles";
+  function ensureStyles$2() {
+    if (document.getElementById(STYLE_ID$1)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID$1;
+    style.textContent = `
+    .lms-highlight {
+      position: relative;
+      border-radius: 3px;
+      padding: 0 2px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .lms-highlight:hover {
+      opacity: 0.8;
+    }
+    .lms-highlight-yellow { background-color: rgba(250, 204, 21, 0.4); border-bottom: 2px solid rgba(250, 204, 21, 0.8); }
+    .lms-highlight-green  { background-color: rgba(74, 222, 128, 0.4); border-bottom: 2px solid rgba(74, 222, 128, 0.8); }
+    .lms-highlight-red    { background-color: rgba(248, 113, 113, 0.4); border-bottom: 2px solid rgba(248, 113, 113, 0.8); }
+  `;
+    document.head.appendChild(style);
+  }
+  const _listeners = /* @__PURE__ */ new Set();
+  function _notify(event, detail) {
+    _listeners.forEach((cb) => {
+      try {
+        cb(event, detail);
+      } catch (e) {
+      }
+    });
+  }
+  function onHighlightChanged(cb) {
+    _listeners.add(cb);
+  }
+  function offHighlightChanged(cb) {
+    _listeners.delete(cb);
+  }
+  async function _loadRecords(platform, conversationId) {
+    return getCollection(platform, conversationId, DATA_TYPES.HIGHLIGHT);
+  }
+  async function _saveRecords(platform, conversationId, records) {
+    return setCollection(platform, conversationId, DATA_TYPES.HIGHLIGHT, records);
+  }
+  function _getRelativeXPath(node, root) {
+    if (node === root) return "";
+    if (!node || !node.parentNode) return "";
+    let idx = 1;
+    let sibling = node.previousSibling;
+    while (sibling) {
+      if (sibling.nodeType === node.nodeType && sibling.nodeName === node.nodeName) {
+        idx++;
+      }
+      sibling = sibling.previousSibling;
+    }
+    const nodeName = node.nodeType === Node.TEXT_NODE ? "text()" : node.nodeName.toLowerCase();
+    const pathIndex = `[${idx}]`;
+    const step = nodeName + pathIndex;
+    if (node.parentNode === root) {
+      return step;
+    }
+    return _getRelativeXPath(node.parentNode, root) + "/" + step;
+  }
+  function _resolveRelativeXPath(path, root) {
+    if (!path) return root;
+    try {
+      const evaluator = new XPathEvaluator();
+      const result = evaluator.evaluate("." + (path.startsWith("/") ? "" : "/") + path, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+      return result.singleNodeValue;
+    } catch (e) {
+      console.error("[LM-Source][HighlightService] Failed to resolve XPath:", path, e);
+      return null;
+    }
+  }
+  function _applyHighlightDOM(range, record) {
+    ensureStyles$2();
+    const span = document.createElement("span");
+    span.className = `lms-highlight lms-highlight-${record.color}`;
+    span.dataset.lmsHighlightId = record.id;
+    span.title = "Click to remove highlight";
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+    } catch (e) {
+      console.error("[LM-Source][HighlightService] Failed to wrap range", e);
+      return null;
+    }
+    span.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _removeHighlight(record);
+    });
+    return span;
+  }
+  function _restoreHighlightDOM(msgRoot, record) {
+    var _a, _b;
+    const startNode = _resolveRelativeXPath(record.startPath, msgRoot);
+    const endNode = _resolveRelativeXPath(record.endPath, msgRoot);
+    if (!startNode || !endNode) {
+      console.warn(`[LM-Source][HighlightService] Could not resolve nodes for highlight ${record.id}`);
+      return false;
+    }
+    try {
+      const range = document.createRange();
+      const startOffset = Math.min(record.startOffset, ((_a = startNode.textContent) == null ? void 0 : _a.length) || 0);
+      const endOffset = Math.min(record.endOffset, ((_b = endNode.textContent) == null ? void 0 : _b.length) || 0);
+      range.setStart(startNode, startOffset);
+      range.setEnd(endNode, endOffset);
+      const rangeText = range.toString().trim();
+      if (rangeText && !record.text.includes(rangeText) && !rangeText.includes(record.text)) {
+        console.warn(`[LM-Source][HighlightService] Text mismatch for highlight ${record.id}. Expected: "${record.text.slice(0, 20)}", Got: "${rangeText.slice(0, 20)}"`);
+      }
+      _applyHighlightDOM(range, record);
+      return true;
+    } catch (e) {
+      console.warn(`[LM-Source][HighlightService] Failed to restore highlight ${record.id}`, e);
+      return false;
+    }
+  }
+  async function saveHighlight(selection, color, messageId, platform, conversationId, msgRoot) {
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return null;
+    const startPath = _getRelativeXPath(range.startContainer, msgRoot);
+    const endPath = _getRelativeXPath(range.endContainer, msgRoot);
+    const text = selection.toString();
+    const record = createHighlight({
+      platform,
+      conversationId,
+      messageId,
+      text,
+      color,
+      startPath,
+      startOffset: range.startOffset,
+      endPath,
+      endOffset: range.endOffset
+    });
+    const records = await _loadRecords(platform, conversationId);
+    records.push(record);
+    await _saveRecords(platform, conversationId, records);
+    _applyHighlightDOM(range, record);
+    _notify("created", { record });
+    return record;
+  }
+  async function removeHighlight(record) {
+    const records = await _loadRecords(record.platform, record.conversationId);
+    const filtered = records.filter((r) => r.id !== record.id);
+    await _saveRecords(record.platform, record.conversationId, filtered);
+    const span = document.querySelector(`[data-lms-highlight-id="${record.id}"]`);
+    if (span) {
+      const parent = span.parentNode;
+      while (span.firstChild) {
+        parent.insertBefore(span.firstChild, span);
+      }
+      parent.removeChild(span);
+      parent.normalize();
+    }
+    _notify("removed", { recordId: record.id, platform: record.platform, conversationId: record.conversationId });
+  }
+  async function getHighlights(platform, conversationId) {
+    return _loadRecords(platform, conversationId);
+  }
+  async function clearHighlights(platform, conversationId) {
+    const records = await _loadRecords(platform, conversationId);
+    for (const r of records) {
+      const span = document.querySelector(`[data-lms-highlight-id="${r.id}"]`);
+      if (span) {
+        const parent = span.parentNode;
+        while (span.firstChild) parent.insertBefore(span.firstChild, span);
+        parent.removeChild(span);
+        parent.normalize();
+      }
+    }
+    await _saveRecords(platform, conversationId, []);
+    _notify("cleared", { platform, conversationId });
+  }
+  async function applyHighlightsToDOM(adapterRef, platform, conversationId) {
+    ensureStyles$2();
+    const records = await _loadRecords(platform, conversationId);
+    if (records.length === 0) return 0;
+    let count = 0;
+    const elements = adapterRef.getMessageElements();
+    const elementsMap = /* @__PURE__ */ new Map();
+    elements.forEach((el, idx) => {
+      const data = adapterRef.extractMessageData(el, idx);
+      if (data) elementsMap.set(data.messageId, el);
+    });
+    for (const record of records) {
+      const msgRoot = elementsMap.get(record.messageId);
+      if (msgRoot) {
+        if (!msgRoot.querySelector(`[data-lms-highlight-id="${record.id}"]`)) {
+          if (_restoreHighlightDOM(msgRoot, record)) count++;
+        }
+      }
+    }
+    console.log(`[LM-Source][HighlightService] Re-applied ${count} highlight(s) after page load`);
+    return count;
+  }
+  const HighlightService = Object.freeze({
+    saveHighlight,
+    removeHighlight,
+    getHighlights,
+    clearHighlights,
+    applyHighlightsToDOM,
+    onHighlightChanged,
+    offHighlightChanged
+  });
+  const TOOLBAR_ID = "lms-highlight-toolbar";
+  let _platform = null;
+  let _conversationId = null;
+  function ensureStyles$1() {
+    if (document.getElementById(TOOLBAR_ID + "-styles")) return;
+    const style = document.createElement("style");
+    style.id = TOOLBAR_ID + "-styles";
+    style.textContent = `
+    #${TOOLBAR_ID} {
+      position: absolute;
+      z-index: 2147483640;
+      display: none;
+      background: rgba(15, 17, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 4px 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      gap: 6px;
+      align-items: center;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      transform: translateY(5px);
+      opacity: 0;
+    }
+    #${TOOLBAR_ID}.lms-visible {
+      display: flex;
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .lms-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s ease, border-color 0.1s ease;
+    }
+    .lms-swatch:hover {
+      transform: scale(1.15);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    .lms-swatch[data-color="yellow"] { background-color: #facc15; }
+    .lms-swatch[data-color="green"]  { background-color: #4ade80; }
+    .lms-swatch[data-color="red"]    { background-color: #f87171; }
+  `;
+    document.head.appendChild(style);
+  }
+  function createToolbar() {
+    ensureStyles$1();
+    let toolbar = document.getElementById(TOOLBAR_ID);
+    if (toolbar) return toolbar;
+    toolbar = document.createElement("div");
+    toolbar.id = TOOLBAR_ID;
+    const colors = ["yellow", "green", "red"];
+    for (const c of colors) {
+      const swatch = document.createElement("div");
+      swatch.className = "lms-swatch";
+      swatch.dataset.color = c;
+      swatch.title = `Highlight ${c}`;
+      swatch.addEventListener("mousedown", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await handleSwatchClick(c);
+        hideToolbar();
+      });
+      toolbar.appendChild(swatch);
+    }
+    document.body.appendChild(toolbar);
+    return toolbar;
+  }
+  let activeSelectionRange = null;
+  let activeMessageRoot = null;
+  let activeMessageId = null;
+  async function handleSwatchClick(color) {
+    if (!activeSelectionRange || !activeMessageRoot || !activeMessageId) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(activeSelectionRange);
+    await HighlightService.saveHighlight(
+      sel,
+      color,
+      activeMessageId,
+      _platform,
+      _conversationId,
+      activeMessageRoot
+    );
+    sel.removeAllRanges();
+  }
+  function hideToolbar() {
+    const toolbar = document.getElementById(TOOLBAR_ID);
+    if (toolbar) {
+      toolbar.classList.remove("lms-visible");
+      setTimeout(() => {
+        if (!toolbar.classList.contains("lms-visible")) {
+          toolbar.style.display = "none";
+        }
+      }, 150);
+    }
+  }
+  function showToolbar(rect) {
+    const toolbar = createToolbar();
+    toolbar.style.display = "flex";
+    const top = rect.top + window.scrollY - 35;
+    const left = rect.left + window.scrollX + rect.width / 2 - toolbar.offsetWidth / 2;
+    toolbar.style.top = `${top}px`;
+    toolbar.style.left = `${Math.max(10, left)}px`;
+    toolbar.offsetHeight;
+    toolbar.classList.add("lms-visible");
+  }
+  function onMouseUp(e) {
+    if (e.target.closest(`#${TOOLBAR_ID}`)) return;
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) {
+      hideToolbar();
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    const text = range.toString().trim();
+    if (!text) {
+      hideToolbar();
+      return;
+    }
+    let msgRoot = range.commonAncestorContainer;
+    if (msgRoot.nodeType === Node.TEXT_NODE) msgRoot = msgRoot.parentNode;
+    const container = msgRoot.closest("[data-lms-msg-id]");
+    if (!container) {
+      hideToolbar();
+      return;
+    }
+    activeSelectionRange = range.cloneRange();
+    activeMessageRoot = container;
+    activeMessageId = container.getAttribute("data-lms-msg-id");
+    const rect = range.getBoundingClientRect();
+    showToolbar(rect);
+  }
+  function init$1(adapterRef, platform, conversationId) {
+    _platform = platform;
+    _conversationId = conversationId;
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("mousedown", (e) => {
+      if (!e.target.closest(`#${TOOLBAR_ID}`)) {
+        hideToolbar();
+      }
+    });
+  }
+  function destroy$1() {
+    document.removeEventListener("mouseup", onMouseUp);
+    const t = document.getElementById(TOOLBAR_ID);
+    if (t) t.remove();
+  }
+  const HighlightToolbar = {
+    init: init$1,
+    destroy: destroy$1
+  };
+  const PANEL_ID = "lms-highlights-panel";
+  const STYLE_ID = "lms-highlights-styles";
+  const Z_INDEX = "2147483636";
+  const COLOR_MAP = {
+    yellow: { label: "Yellow", bg: "rgba(250, 204, 21, 0.1)", border: "rgba(250, 204, 21, 0.4)" },
+    green: { label: "Green", bg: "rgba(74, 222, 128, 0.1)", border: "rgba(74, 222, 128, 0.4)" },
+    red: { label: "Red", bg: "rgba(248, 113, 113, 0.1)", border: "rgba(248, 113, 113, 0.4)" }
+  };
+  function buildStyles() {
+    return `
+/* ── LM-Source Highlights Panel ── */
+
+#${PANEL_ID} {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100vh;
+  background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);
+  color: #e2e8f0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  z-index: ${Z_INDEX};
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 32px rgba(0, 0, 0, 0.55);
+  border-left: 1px solid rgba(167, 139, 250, 0.2);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+#${PANEL_ID}.lms-hl-open {
+  transform: translateX(0);
+}
+
+/* Header */
+.lms-hl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  background: rgba(167, 139, 250, 0.07);
+  border-bottom: 1px solid rgba(167, 139, 250, 0.18);
+  flex-shrink: 0;
+}
+.lms-hl-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c4b5fd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.03em;
+}
+.lms-hl-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+.lms-hl-close-btn:hover { background: rgba(167,139,250,0.12); color: #c4b5fd; }
+
+/* Body */
+.lms-hl-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.lms-hl-body::-webkit-scrollbar { width: 6px; }
+.lms-hl-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+.lms-hl-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+.lms-hl-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* Empty state */
+.lms-hl-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+/* Color Group */
+.lms-hl-group-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lms-hl-group-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Highlight Card */
+.lms-hl-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  position: relative;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.lms-hl-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.lms-hl-text {
+  font-size: 13px;
+  color: #e2e8f0;
+  word-break: break-word;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* Card Actions */
+.lms-hl-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 8px;
+}
+.lms-hl-action-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.05);
+  color: #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.lms-hl-action-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.lms-hl-action-btn.delete:hover {
+  background: rgba(248,113,113,0.15);
+  color: #fca5a5;
+  border-color: rgba(248,113,113,0.2);
+}
+`;
+  }
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = buildStyles();
+    document.head.appendChild(style);
+  }
+  let _options = null;
+  function _createPanel() {
+    ensureStyles();
+    const existing = document.getElementById(PANEL_ID);
+    if (existing) return existing;
+    const panel = document.createElement("div");
+    panel.id = PANEL_ID;
+    panel.dataset.lmsInjected = "1";
+    const header = document.createElement("div");
+    header.className = "lms-hl-header";
+    const title = document.createElement("div");
+    title.className = "lms-hl-title";
+    title.innerHTML = "<span>🖍 Highlights</span>";
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "lms-hl-close-btn";
+    closeBtn.innerHTML = "✕";
+    closeBtn.title = "Close panel";
+    closeBtn.addEventListener("click", close);
+    header.append(title, closeBtn);
+    const body = document.createElement("div");
+    body.className = "lms-hl-body";
+    body.id = `${PANEL_ID}-body`;
+    panel.append(header, body);
+    document.body.appendChild(panel);
+    return panel;
+  }
+  function _renderGroup(color, highlights) {
+    if (!highlights || highlights.length === 0) return null;
+    const group = document.createElement("div");
+    group.className = "lms-hl-group";
+    group.dataset.color = color;
+    const conf = COLOR_MAP[color] || COLOR_MAP.yellow;
+    const title = document.createElement("div");
+    title.className = "lms-hl-group-title";
+    title.innerHTML = `<div class="lms-hl-group-swatch" style="background: ${conf.border}"></div>${conf.label} (${highlights.length})`;
+    group.appendChild(title);
+    for (const hl of highlights) {
+      const card = document.createElement("div");
+      card.className = "lms-hl-card";
+      card.dataset.id = hl.id;
+      card.style.borderLeft = `3px solid ${conf.border}`;
+      card.style.background = `linear-gradient(90deg, ${conf.bg} 0%, rgba(15, 23, 42, 0.6) 100%)`;
+      const text = document.createElement("div");
+      text.className = "lms-hl-text";
+      text.textContent = hl.text;
+      const actions = document.createElement("div");
+      actions.className = "lms-hl-actions";
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "lms-hl-action-btn";
+      copyBtn.innerHTML = "📋 Copy";
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(hl.text);
+        copyBtn.innerHTML = "✓ Copied";
+        setTimeout(() => copyBtn.innerHTML = "📋 Copy", 1500);
+      });
+      const delBtn = document.createElement("button");
+      delBtn.className = "lms-hl-action-btn delete";
+      delBtn.innerHTML = "✕ Remove";
+      delBtn.addEventListener("click", () => {
+        if (_options && _options.onRemove) _options.onRemove(hl.id);
+      });
+      actions.append(copyBtn, delBtn);
+      card.append(text, actions);
+      group.appendChild(card);
+    }
+    return group;
+  }
+  function _renderContent(highlights) {
+    const body = document.getElementById(`${PANEL_ID}-body`);
+    if (!body) return;
+    body.innerHTML = "";
+    if (!highlights || highlights.length === 0) {
+      body.innerHTML = `<div class="lms-hl-empty">
+      <div style="font-size: 24px; margin-bottom: 10px;">🖍</div>
+      No highlights yet.<br>Select text in any message to highlight it.
+    </div>`;
+      return;
+    }
+    const colors = ["yellow", "green", "red"];
+    for (const c of colors) {
+      const group = highlights.filter((h) => h.color === c);
+      const node = _renderGroup(c, group);
+      if (node) body.appendChild(node);
+    }
+  }
+  function render(highlights, options = {}) {
+    _options = options;
+    _createPanel();
+    _renderContent(highlights);
+  }
+  function open() {
+    const panel = document.getElementById(PANEL_ID);
+    if (panel) panel.classList.add("lms-hl-open");
+  }
+  function close() {
+    const panel = document.getElementById(PANEL_ID);
+    if (panel) panel.classList.remove("lms-hl-open");
+  }
+  function toggle() {
+    const panel = document.getElementById(PANEL_ID);
+    if (panel) panel.classList.toggle("lms-hl-open");
+    else console.warn("[LM-Source] HighlightsPanel not rendered yet.");
+  }
+  function destroy() {
+    const panel = document.getElementById(PANEL_ID);
+    if (panel) panel.remove();
+    const style = document.getElementById(STYLE_ID);
+    if (style) style.remove();
+  }
+  function addHighlight(hl) {
+  }
+  const HighlightsPanel = Object.freeze({
+    render,
+    open,
+    close,
+    toggle,
+    destroy,
+    addHighlight
   });
   const LOG_PREFIX = "[LM-Source]";
   const DEBOUNCE_MS = 400;
@@ -3584,6 +4253,11 @@
       });
       return true;
     }
+    if ((request == null ? void 0 : request.type) === "LMS_OPEN_HIGHLIGHTS") {
+      HighlightsPanel.toggle();
+      sendResponse({ success: true });
+      return true;
+    }
     return false;
   });
   document.addEventListener("lms:adapterReady", (e) => {
@@ -3599,6 +4273,7 @@
     initPinFeature(readyAdapter, platform, conversationId);
     initDeleteFeature(readyAdapter, platform, conversationId);
     initEditFeature(readyAdapter, platform, conversationId);
+    initHighlightFeature(readyAdapter, platform, conversationId);
   });
   document.addEventListener("lms:messageAdded", (e) => {
     const { messageId, role, element } = e.detail;
@@ -3846,6 +4521,40 @@
       }
     }, 2500);
     console.log(`${LOG_PREFIX} Edit feature (P2.5) initialised.`);
+  }
+  async function initHighlightFeature(adapterRef, platform, conversationId) {
+    HighlightToolbar.init(adapterRef, platform, conversationId);
+    const highlights = await HighlightService.getHighlights(platform, conversationId);
+    HighlightsPanel.render(highlights, {
+      onRemove: async (id) => {
+        const hls = await HighlightService.getHighlights(platform, conversationId);
+        const hl = hls.find((h) => h.id === id);
+        if (hl) {
+          await HighlightService.removeHighlight(hl);
+          HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
+        }
+      }
+    });
+    const _optionsCache = {
+      onRemove: async (id) => {
+        const hls = await HighlightService.getHighlights(platform, conversationId);
+        const hl = hls.find((h) => h.id === id);
+        if (hl) {
+          await HighlightService.removeHighlight(hl);
+          HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
+        }
+      }
+    };
+    setTimeout(async () => {
+      const count = await HighlightService.applyHighlightsToDOM(adapterRef, platform, conversationId);
+      if (count > 0) {
+        console.log(`${LOG_PREFIX} Re-applied ${count} local highlight(s) after page load.`);
+      }
+    }, 3e3);
+    HighlightService.onHighlightChanged(async () => {
+      HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
+    });
+    console.log(`${LOG_PREFIX} Highlight feature (P2.6) initialised.`);
   }
   window.addEventListener("beforeunload", () => {
     if (messageObserver) {

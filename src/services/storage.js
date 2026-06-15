@@ -313,8 +313,10 @@ function createHighlight({
   messageId,
   text,
   color,
-  xpath = '',
-  textOffset = 0,
+  startPath = '',
+  startOffset = 0,
+  endPath = '',
+  endOffset = 0,
 }) {
   return {
     id: _generateId(),
@@ -323,8 +325,10 @@ function createHighlight({
     messageId,
     text,
     color,
-    xpath,
-    textOffset,
+    startPath,
+    startOffset,
+    endPath,
+    endOffset,
     createdAt: Date.now(),
   };
 }

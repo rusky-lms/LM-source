@@ -236,24 +236,24 @@ Allow users to edit responses locally. Data persists via the Storage Service (P1
 ---
 
 ### Task P2.6 — Feature F-05: Highlight Text
-**Status:** ⏳ Pending | **Difficulty:** Medium | **Blocker for:** None (but depends on P2.1)
+**Status:** ✅ Done | **Difficulty:** Medium | **Blocker for:** None (but depends on P2.1)
 
 Allow users to select and highlight text within messages. Data persists via the Storage Service (P1.3).
 
 **Deliverables:**
-- Text selection trigger (context menu or inline button).
-- `src/services/highlightService.js`
-- Three colors: Yellow, Green, Red.
-- `src/components/HighlightsPanel.jsx`
+- Text selection trigger (context menu or inline button). ✅
+- `src/services/highlightService.js` ✅
+- Three colors: Yellow, Green, Red. ✅
+- `src/components/HighlightsPanel.js` ✅
 
 **Action Steps:**
-1. In `src/content.js`, add a listener for text selection (e.g., on mouseup). If text is selected inside a message, show a small floating toolbar with 3 color swatches.
-2. `highlightService.js`: define `saveHighlight(selection, color, messageId)`. Store the text snippet, the color, and the position (XPath or text offset) to enable re-anchoring after page refresh.
-3. Wrap the selected text in a `<span>` with the appropriate background color (Yellow: #ffff00, Green: #00ff00, Red: #ff0000).
-4. Store the highlight data in `chrome.storage.local`.
-5. Create a "Highlights Summary" tab/panel that groups snippets by color.
-6. On page load (or MutationObserver firing for new content), iterate through stored highlights and re-apply the `<span>` wrappers using anchor registration.
-7. Verify highlights persist across page refreshes.
+1. ✅ In `src/content.js`, add a listener for text selection (e.g., on mouseup). If text is selected inside a message, show a small floating toolbar with 3 color swatches.
+2. ✅ `highlightService.js`: define `saveHighlight(selection, color, messageId)`. Store the text snippet, the color, and the position (start/end XPath) to enable re-anchoring after page refresh.
+3. ✅ Wrap the selected text in a `<span>` with the appropriate background color (Yellow: #ffff00, Green: #00ff00, Red: #ff0000).
+4. ✅ Store the highlight data in `chrome.storage.local`.
+5. ✅ Create a "Highlights Summary" tab/panel that groups snippets by color.
+6. ✅ On page load (or MutationObserver firing for new content), iterate through stored highlights and re-apply the `<span>` wrappers using anchor registration.
+7. ✅ Verify highlights persist across page refreshes.
 
 ---
 

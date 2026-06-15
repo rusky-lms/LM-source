@@ -24,8 +24,10 @@
  * @property {string} messageId
  * @property {string} text           - The highlighted text snippet
  * @property {'yellow'|'green'|'red'} color - Highlight colour
- * @property {string} xpath          - XPath to the text node for re-anchoring after page reload
- * @property {number} textOffset     - Character offset within the text node
+ * @property {string} startPath        - XPath to start node
+ * @property {number} startOffset      - Offset in start node
+ * @property {string} endPath          - XPath to end node
+ * @property {number} endOffset        - Offset in end node
  * @property {number} createdAt      - Unix ms
  * @property {number} [_updatedAt]
  */

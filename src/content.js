@@ -13,6 +13,7 @@
 //  7. (P2.3) Inject per-message toolbar with Pin action; manage Pinboard panel.
 //  8. (P2.4) Soft-delete toolbar action; bulk-delete mode; show/hide toggle.
 //  9. (P2.5) Inline edit toolbar action; restore edited text on page load.
+// 10. (P2.6) Inline text highlight selection; highlight summary panel.
 
 'use strict';
 
@@ -26,6 +27,9 @@ import { MessageToolbar }   from './components/messageToolbar.js';
 import { PinboardPanel }    from './components/PinboardPanel.js';
 import DeleteService         from './services/deleteService.js';
 import EditService           from './services/editService.js';
+import HighlightService      from './services/highlightService.js';
+import HighlightToolbar      from './components/highlightToolbar.js';
+import HighlightsPanel       from './components/HighlightsPanel.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -225,6 +229,13 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true; // Keep channel open for async response
   }
 
+  // P2.6 — Open Highlights Panel
+  if (request?.type === 'LMS_OPEN_HIGHLIGHTS') {
+    HighlightsPanel.toggle();
+    sendResponse({ success: true });
+    return true;
+  }
+
   return false;
 });
 
@@ -251,6 +262,9 @@ document.addEventListener('lms:adapterReady', (e) => {
 
   // P2.5 — Init edit feature (register action + restore persisted edits)
   initEditFeature(readyAdapter, platform, conversationId);
+
+  // P2.6 — Init highlight feature
+  initHighlightFeature(readyAdapter, platform, conversationId);
 });
 
 // React to newly added messages: attach toolbar
@@ -656,6 +670,51 @@ async function initEditFeature(adapterRef, platform, conversationId) {
   }, 2500);
 
   console.log(`${LOG_PREFIX} Edit feature (P2.5) initialised.`);
+}
+
+// ── P2.6 — Highlight feature initialisation ────────────────────────────────────
+
+async function initHighlightFeature(adapterRef, platform, conversationId) {
+  HighlightToolbar.init(adapterRef, platform, conversationId);
+
+  // Render HighlightsPanel initially closed
+  const highlights = await HighlightService.getHighlights(platform, conversationId);
+  HighlightsPanel.render(highlights, {
+    onRemove: async (id) => {
+      const hls = await HighlightService.getHighlights(platform, conversationId);
+      const hl = hls.find(h => h.id === id);
+      if (hl) {
+        await HighlightService.removeHighlight(hl);
+        HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
+      }
+    }
+  });
+  // Local hack: keep the options reference to avoid circular binding
+  const _optionsCache = {
+    onRemove: async (id) => {
+      const hls = await HighlightService.getHighlights(platform, conversationId);
+      const hl = hls.find(h => h.id === id);
+      if (hl) {
+        await HighlightService.removeHighlight(hl);
+        HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
+      }
+    }
+  };
+
+  // Re-apply persisted highlights after a short delay
+  setTimeout(async () => {
+    const count = await HighlightService.applyHighlightsToDOM(adapterRef, platform, conversationId);
+    if (count > 0) {
+      console.log(`${LOG_PREFIX} Re-applied ${count} local highlight(s) after page load.`);
+    }
+  }, 3000);
+
+  // Listen for changes and re-render the panel
+  HighlightService.onHighlightChanged(async () => {
+    HighlightsPanel.render(await HighlightService.getHighlights(platform, conversationId), _optionsCache);
+  });
+
+  console.log(`${LOG_PREFIX} Highlight feature (P2.6) initialised.`);
 }
 
 // ── Cleanup on page unload ────────────────────────────────────────────────────

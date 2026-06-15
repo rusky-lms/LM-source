@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusText           = document.querySelector('.status-text');
   const extractBtn           = document.getElementById('btn-extract');
   const pinboardBtn          = document.getElementById('btn-pinboard');
+  const highlightsBtn        = document.getElementById('btn-highlights');
   const handoffBtn           = document.getElementById('btn-handoff');
   const toggleDeletedBtn     = document.getElementById('btn-toggle-deleted');
   const toggleDeletedLabel   = document.getElementById('btn-toggle-deleted-label');
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function enableButtons() {
-    [extractBtn, pinboardBtn, handoffBtn, toggleDeletedBtn, bulkDeleteBtn].forEach(btn => {
+    [extractBtn, pinboardBtn, highlightsBtn, handoffBtn, toggleDeletedBtn, bulkDeleteBtn].forEach(btn => {
       btn.disabled = false;
     });
   }
@@ -107,6 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
   pinboardBtn.addEventListener('click', () => {
     if (activeTabId === null) return;
     chrome.tabs.sendMessage(activeTabId, { type: 'LMS_OPEN_PINBOARD' });
+    window.close();
+  });
+
+  highlightsBtn.addEventListener('click', () => {
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(activeTabId, { type: 'LMS_OPEN_HIGHLIGHTS' });
     window.close();
   });
 
