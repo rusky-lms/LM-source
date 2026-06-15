@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LM-Source",
   "version": "1.1.0",
-  "description": "Enhance your LLM experience on Claude.ai and ChatGPT with context extraction, pinning, editing, and cross-platform handoff.",
+  "description": "Enhance your LLM experience on Claude.ai, ChatGPT, and Google Gemini with context extraction, pinning, editing, and cross-platform handoff.",
   "icons": {
     "16": "logo-icon16.png",
     "48": "logo-icon48.png",
@@ -29,14 +29,16 @@
   "host_permissions": [
     "https://claude.ai/*",
     "https://chat.openai.com/*",
-    "https://chatgpt.com/*"
+    "https://chatgpt.com/*",
+    "https://gemini.google.com/*"
   ],
   "content_scripts": [
     {
       "matches": [
         "https://claude.ai/*",
         "https://chat.openai.com/*",
-        "https://chatgpt.com/*"
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*"
       ],
       "js": ["src/content.js"],
       "run_at": "document_idle"

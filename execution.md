@@ -2,6 +2,7 @@
 
 > PRD-to-Tasks breakdown for LM-Source (v1.1) Chrome/Edge Extension.
 > This document serves as the master checklist. Complete each task sequentially, and update the status as you go.
+> **Supported Platforms:** Claude.ai · ChatGPT · Google Gemini
 
 ---
 
@@ -78,23 +79,30 @@ Implement `chrome.storage.local` service, namespace data, and define storage quo
 ## PHASE 2: Core Feature Implementation
 
 ### Task P2.1 — DOM Injection Strategy & Content Script Architecture
-**Status:** ⏳ Pending | **Difficulty:** High | **Blocker for:** P2.2, P2.3, P2.4, P2.5, P2.6
+**Status:** ✅ Done | **Difficulty:** High | **Blocker for:** P2.2, P2.3, P2.4, P2.5, P2.6
 
-Build the robustness layer for interacting with Claude.ai and ChatGPT.
+Build the robustness layer for interacting with Claude.ai, ChatGPT, **and Google Gemini**.
 
 **Deliverables:**
 - `src/content.js`
 - `src/adapters/claudeAdapter.js`
 - `src/adapters/chatgptAdapter.js`
+- `src/adapters/geminiAdapter.js` ✅ **New — Gemini support**
 - `MutationObserver` logic to detect new messages.
+
+**Gemini-specific notes:**
+- Gemini uses Angular-style **custom HTML elements**: `<conversation-turn>`, `<user-query>`, `<model-response>`, `<message-content>`. These are the primary selectors.
+- Parts of Gemini's UI are encapsulated in **Shadow DOM**. The adapter includes a `queryShadow()` helper to pierce one shadow level where needed.
+- Conversation ID is extracted from the URL path: `/app/<id>` or `/chat/<id>`.
+- `manifest.json` updated: added `https://gemini.google.com/*` to `host_permissions` and `content_scripts.matches`.
 
 **Action Steps:**
 1. Create the `src/adapters/` directory.
-2. In `claudeAdapter.js` and `chatgptAdapter.js`, implement a `PlatformAdapter` interface with methods: `getMessageElements()`, `extractMessageData(element)`, `getPlatformIdentifier()`, `detectTokenLimitWarning()`.
-3. In `src/content.js`, detect the current URL (`window.location.hostname`) and instantiate the correct adapter.
+2. In `claudeAdapter.js`, `chatgptAdapter.js`, and `geminiAdapter.js`, implement a `PlatformAdapter` interface with methods: `getMessageElements()`, `extractMessageData(element)`, `getPlatformIdentifier()`, `detectTokenLimitWarning()`.
+3. In `src/content.js`, detect the current URL (`window.location.hostname`) and instantiate the correct adapter (Claude / ChatGPT / Gemini).
 4. Implement the `MutationObserver` to watch for new chat messages in the DOM (specific target selectors found in adapter files).
 5. Log to console when a new message is detected (as a basic smoke test).
-6. Verify by pasting the content script into the Chrome DevTools console on Claude.ai and ChatGPT.
+6. Verify by pasting the content script into the Chrome DevTools console on Claude.ai, ChatGPT, and Gemini.
 
 ---
 
@@ -226,7 +234,7 @@ Package the entire conversation into a structured prompt for zero-loss transfer.
    - **New Tab:** `chrome.tabs.create({ url })`, then use `chrome.scripting.executeScript` to inject the prompt into the input field.
    - **Clipboard:** Use the `navigator.clipboard` API (with `clipboardWrite` permission).
    - **Pinboard:** Save to Pinboard using `pinService` (from P2.3).
-7. **Cross-Platform:** Allow the user to select the target platform (Claude or ChatGPT) in the banner UI.
+7. **Cross-Platform:** Allow the user to select the target platform (Claude, ChatGPT, **or Gemini**) in the banner UI.
 
 ---
 
@@ -247,7 +255,7 @@ Ensure a non-intrusive and polished look.
 1. Style the extension popup to match LLM dark/light modes (CSS variables and media queries).
 2. Style injected chat toolbars to feel native to the host platform.
 3. Review all CSS to ensure `!important` is used correctly or that specificity is high enough not to be overridden.
-4. Test visually on both Claude.ai and ChatGPT sites.
+4. Test visually on Claude.ai, ChatGPT, **and Gemini** sites.
 
 ---
 
@@ -261,7 +269,7 @@ Verify functionality in Chrome and Edge.
 - Performance checks: Page load time < 50ms, message render overhead < 5ms.
 
 **Action Steps:**
-1. Load the extension in Chrome. Go through each feature (P2.2 to P2.7) on Claude.ai and ChatGPT. Log bugs.
+1. Load the extension in Chrome. Go through each feature (P2.2 to P2.7) on Claude.ai, ChatGPT, **and Gemini**. Log bugs.
 2. Load the extension in Edge. Repeat tests.
 3. Use Chrome DevTools Performance tab to measure impact on page load and message rendering.
 4. Fix any browser-specific issues.
@@ -294,13 +302,13 @@ Prepare the final assets for distribution.
 | P1.1 | Scaffold Extension Skeleton | Foundation | Low | - |
 | P1.2 | Build & Dev Toolchain | Foundation | Medium | - |
 | P1.3 | Storage Service & Data Models | Foundation | Medium | P1.1 |
-| P2.1 | DOM Injection & Script Architecture | Core | High | P1.1 |
+| P2.1 | DOM Injection & Script Architecture (Claude + ChatGPT + **Gemini**) | Core | High | P1.1 |
 | P2.2 | F-01: Context Extraction | Core | High | P2.1 |
 | P2.3 | F-02: Pin Messages | Core | Medium | P1.3, P2.1 |
 | P2.4 | F-03: Delete Messages | Core | Low | P1.3, P2.1 |
 | P2.5 | F-04: Edit AI Responses | Core | Medium | P1.3, P2.1 |
 | P2.6 | F-05: Highlight Text | Core | Medium | P1.3, P2.1 |
-| P2.7 | F-06: Context Handoff | Core | Very High | P2.1, P2.2 |
+| P2.7 | F-06: Context Handoff (Claude ↔ ChatGPT ↔ **Gemini**) | Core | Very High | P2.1, P2.2 |
 | P3.1 | UI/UX Polish & Styling | Quality | Medium | P2.7 |
-| P3.2 | Cross-Browser Testing | Quality | Medium | P3.1 |
+| P3.2 | Cross-Browser Testing (Claude + ChatGPT + **Gemini**) | Quality | Medium | P3.1 |
 | P3.3 | Packaging & Store Submission | Quality | Low | P3.2 |

@@ -1,65 +1,321 @@
 // src/content.js
-// Content Script injected into Claude.ai and ChatGPT pages
-// Manages DOM interaction, platform detection, and feature injection
+// LM-Source — Content Script
+//
+// Entry point injected into Claude.ai, ChatGPT, and Google Gemini pages.
+// Responsibilities:
+//  1. Detect the current platform and instantiate the correct adapter.
+//  2. Wait for the chat container to appear in the DOM (SPAs load it async).
+//  3. Process any messages already in the DOM on first load.
+//  4. Run a debounced MutationObserver on the chat container to detect new messages.
+//  5. Expose a lightweight internal event bus so feature modules (P2.2–P2.7)
+//     can subscribe to 'lms:messageAdded' and 'lms:tokenLimitWarning' events.
 
-(function() {
-  'use strict';
+'use strict';
 
-  console.log('[LM-Source] Content script loaded on:', window.location.hostname);
+import { ClaudeAdapter } from './adapters/claudeAdapter.js';
+import { ChatGPTAdapter } from './adapters/chatgptAdapter.js';
+import { GeminiAdapter } from './adapters/geminiAdapter.js';
 
-  // Detect the current platform
-  const hostname = window.location.hostname;
-  let platform = 'unknown';
-  
-  if (hostname.includes('claude.ai')) {
-    platform = 'claude';
-  } else if (hostname.includes('chat.openai.com') || hostname.includes('chatgpt.com')) {
-    platform = 'chatgpt';
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const LOG_PREFIX = '[LM-Source]';
+
+/**
+ * How long (ms) to wait after the last DOM mutation before processing.
+ * Prevents hammering the CPU while ChatGPT/Claude is streaming a response.
+ */
+const DEBOUNCE_MS = 400;
+
+/**
+ * How long (ms) to wait between polls when looking for the chat container
+ * to appear (SPAs may take several seconds to mount it).
+ */
+const CONTAINER_POLL_INTERVAL_MS = 500;
+const CONTAINER_POLL_TIMEOUT_MS = 30_000; // Give up after 30 s
+
+// ── Platform detection & adapter instantiation ────────────────────────────────
+
+const hostname = window.location.hostname;
+
+/** @type {import('./adapters/baseAdapter.js').PlatformAdapter | null} */
+let adapter = null;
+
+if (hostname.includes('claude.ai')) {
+  adapter = new ClaudeAdapter();
+} else if (hostname.includes('chat.openai.com') || hostname.includes('chatgpt.com')) {
+  adapter = new ChatGPTAdapter();
+} else if (hostname.includes('gemini.google.com')) {
+  adapter = new GeminiAdapter();
+}
+
+if (!adapter) {
+  console.warn(`${LOG_PREFIX} Unsupported platform: ${hostname}. Content script idle.`);
+} else {
+  console.log(`${LOG_PREFIX} Adapter loaded for platform: ${adapter.getPlatformIdentifier()}`);
+  init(adapter);
+}
+
+// ── Internal event bus ────────────────────────────────────────────────────────
+// Feature modules subscribe to these custom events on the document.
+// Events are fired from within this content script.
+//
+// Available events:
+//   'lms:messageAdded'       — detail: { messageId, role, text, element }
+//   'lms:tokenLimitWarning'  — detail: { platform, conversationId }
+//   'lms:adapterReady'       — detail: { adapter, platform, conversationId }
+
+/**
+ * Fire an LM-Source custom event on the document.
+ *
+ * @param {string} eventName
+ * @param {object} detail
+ */
+function emit(eventName, detail) {
+  document.dispatchEvent(new CustomEvent(eventName, { detail }));
+}
+
+// ── Seen-message tracking ─────────────────────────────────────────────────────
+// We track message IDs already processed to avoid duplicating events when
+// the MutationObserver fires on streaming updates of existing messages.
+
+/** @type {Set<string>} */
+const seenMessageIds = new Set();
+
+// ── Main initialisation ───────────────────────────────────────────────────────
+
+/**
+ * Initialise the content script for a detected platform.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ */
+async function init(adapter) {
+  const platform = adapter.getPlatformIdentifier();
+  console.log(`${LOG_PREFIX} Waiting for chat container on ${platform}…`);
+
+  const container = await waitForChatContainer(adapter);
+
+  if (!container) {
+    console.warn(
+      `${LOG_PREFIX} Chat container not found after ${CONTAINER_POLL_TIMEOUT_MS / 1000}s. ` +
+      `The adapter selectors may need updating.`
+    );
+    return;
   }
 
-  console.log('[LM-Source] Detected platform:', platform);
+  const conversationId = adapter.getConversationId();
+  console.log(
+    `${LOG_PREFIX} Chat container found. Platform: ${platform}, ` +
+    `Conversation: ${conversationId}`
+  );
 
-  // Initialize MutationObserver to watch for new messages
-  let messageObserver = null;
+  // Let feature modules know we're ready
+  emit('lms:adapterReady', { adapter, platform, conversationId });
 
-  function initMessageObserver() {
-    console.log('[LM-Source] Initializing MutationObserver for messages...');
-    
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            // TODO: Detect new message elements added to the DOM
-            // This is a placeholder for P2.1 (DOM Injection Strategy)
-          }
-        });
-      });
-    });
+  // Process messages already in the DOM
+  processCurrentMessages(adapter);
 
-    // Observe the document body for changes
-    // In P2.1, this will be refined to target specific chat containers
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
+  // Watch for new / updated messages
+  startMutationObserver(adapter, container);
 
-    messageObserver = observer;
-    console.log('[LM-Source] MutationObserver active.');
-  }
+  // Handle SPA navigations: Claude and ChatGPT navigate without a full page
+  // reload, so we listen for URL changes and re-initialise when the path changes.
+  watchForNavigation(adapter);
+}
 
-  // Initialize on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMessageObserver);
-  } else {
-    initMessageObserver();
-  }
+// ── Chat container polling ────────────────────────────────────────────────────
 
-  // Cleanup on page unload
-  window.addEventListener('beforeunload', () => {
-    if (messageObserver) {
-      messageObserver.disconnect();
-      console.log('[LM-Source] MutationObserver disconnected.');
+/**
+ * Poll until the chat container appears or the timeout expires.
+ * Returns null on timeout.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ * @returns {Promise<Element | null>}
+ */
+function waitForChatContainer(adapter) {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+
+    const poll = () => {
+      const container = adapter.getChatContainer();
+      if (container) {
+        resolve(container);
+        return;
+      }
+      if (Date.now() - startTime >= CONTAINER_POLL_TIMEOUT_MS) {
+        resolve(null);
+        return;
+      }
+      setTimeout(poll, CONTAINER_POLL_INTERVAL_MS);
+    };
+
+    poll();
+  });
+}
+
+// ── Message processing ────────────────────────────────────────────────────────
+
+/**
+ * Scan all current message elements and emit 'lms:messageAdded' for any
+ * not yet seen.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ */
+function processCurrentMessages(adapter) {
+  const elements = adapter.getMessageElements();
+  console.log(`${LOG_PREFIX} Processing ${elements.length} existing message(s).`);
+
+  elements.forEach((el, index) => {
+    const data = adapter.extractMessageData(el, index);
+    if (!data) return;
+
+    if (!seenMessageIds.has(data.messageId)) {
+      seenMessageIds.add(data.messageId);
+      console.log(
+        `${LOG_PREFIX} [${data.role.toUpperCase()}] ${data.messageId}: ` +
+        `"${data.text.slice(0, 80)}${data.text.length > 80 ? '…' : ''}"`
+      );
+      emit('lms:messageAdded', data);
     }
   });
+}
 
-})();
+/**
+ * Process a single newly-detected message element.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ * @param {Element} el
+ * @param {number} index
+ */
+function processNewMessage(adapter, el, index) {
+  const data = adapter.extractMessageData(el, index);
+  if (!data || seenMessageIds.has(data.messageId)) return;
+
+  seenMessageIds.add(data.messageId);
+  console.log(
+    `${LOG_PREFIX} New message detected [${data.role.toUpperCase()}] ${data.messageId}: ` +
+    `"${data.text.slice(0, 80)}${data.text.length > 80 ? '…' : ''}"`
+  );
+
+  emit('lms:messageAdded', data);
+  checkTokenLimit(adapter);
+}
+
+// ── Token limit monitoring ────────────────────────────────────────────────────
+
+/**
+ * Check for a token limit warning and emit the event once if found.
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ */
+let _tokenLimitWarned = false;
+function checkTokenLimit(adapter) {
+  if (_tokenLimitWarned) return;
+  if (adapter.detectTokenLimitWarning()) {
+    _tokenLimitWarned = true;
+    const conversationId = adapter.getConversationId();
+    console.warn(`${LOG_PREFIX} ⚠ Token limit warning detected! Conversation: ${conversationId}`);
+    emit('lms:tokenLimitWarning', {
+      platform: adapter.getPlatformIdentifier(),
+      conversationId,
+    });
+  }
+}
+
+// ── MutationObserver ──────────────────────────────────────────────────────────
+
+/** @type {MutationObserver | null} */
+let messageObserver = null;
+
+/** @type {ReturnType<typeof setTimeout> | null} */
+let debounceTimer = null;
+
+/**
+ * Start the MutationObserver on the chat container.
+ * Uses a debounce so streaming updates (dozens of mutations per second)
+ * are collapsed into a single processing pass.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ * @param {Element} container
+ */
+function startMutationObserver(adapter, container) {
+  if (messageObserver) {
+    messageObserver.disconnect();
+  }
+
+  messageObserver = new MutationObserver(() => {
+    // Debounce: wait until mutations stop before processing
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const elements = adapter.getMessageElements();
+      elements.forEach((el, index) => processNewMessage(adapter, el, index));
+    }, DEBOUNCE_MS);
+  });
+
+  messageObserver.observe(container, {
+    childList: true,  // detect added/removed child nodes
+    subtree: true,    // watch the full subtree (streaming updates nested elements)
+    characterData: false, // ignore text mutations — we re-scan the full list
+  });
+
+  console.log(`${LOG_PREFIX} MutationObserver active on chat container.`);
+}
+
+// ── SPA Navigation detection ──────────────────────────────────────────────────
+// Claude and ChatGPT are SPAs — navigating to a new conversation does NOT
+// trigger a page reload, so we must detect URL changes and re-initialise.
+
+/**
+ * Watch for URL changes via history.pushState / popstate.
+ * When a navigation is detected, reset state and re-initialise.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ */
+function watchForNavigation(adapter) {
+  let lastPath = window.location.pathname;
+
+  // Intercept history.pushState (used by both Claude and ChatGPT)
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    onNavigate(adapter, lastPath);
+    lastPath = window.location.pathname;
+  };
+
+  // Also handle browser back/forward
+  window.addEventListener('popstate', () => {
+    onNavigate(adapter, lastPath);
+    lastPath = window.location.pathname;
+  });
+}
+
+/**
+ * Handle a detected SPA navigation.
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapter
+ * @param {string} previousPath
+ */
+function onNavigate(adapter, previousPath) {
+  const newPath = window.location.pathname;
+  if (newPath === previousPath) return;
+
+  console.log(`${LOG_PREFIX} SPA navigation detected: ${previousPath} → ${newPath}`);
+
+  // Disconnect the old observer and reset tracking state
+  if (messageObserver) {
+    messageObserver.disconnect();
+    messageObserver = null;
+  }
+  seenMessageIds.clear();
+  _tokenLimitWarned = false;
+
+  // Re-initialise for the new conversation
+  setTimeout(() => init(adapter), 500); // Brief delay for the SPA to mount the new view
+}
+
+// ── Cleanup on page unload ────────────────────────────────────────────────────
+
+window.addEventListener('beforeunload', () => {
+  if (messageObserver) {
+    messageObserver.disconnect();
+    console.log(`${LOG_PREFIX} MutationObserver disconnected.`);
+  }
+  clearTimeout(debounceTimer);
+});
