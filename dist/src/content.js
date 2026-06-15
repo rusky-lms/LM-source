@@ -834,7 +834,7 @@
   }
   const PANEL_ID$1 = "lms-context-panel";
   const TOGGLE_BTN_ID$1 = "lms-context-toggle-btn";
-  const STYLE_ID$2 = "lms-context-styles";
+  const STYLE_ID$3 = "lms-context-styles";
   const PANEL_WIDTH = "400px";
   const Z_INDEX$1 = "2147483640";
   const PLATFORM_LABELS = {
@@ -1480,9 +1480,9 @@
      */
     render(ctx, { onRefresh } = {}) {
       _onRefresh = onRefresh || null;
-      if (!document.getElementById(STYLE_ID$2)) {
+      if (!document.getElementById(STYLE_ID$3)) {
         const styleEl = document.createElement("style");
-        styleEl.id = STYLE_ID$2;
+        styleEl.id = STYLE_ID$3;
         styleEl.textContent = buildStyles$2();
         document.head.appendChild(styleEl);
       }
@@ -1525,7 +1525,7 @@
       var _a, _b, _c;
       (_a = document.getElementById(PANEL_ID$1)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID$1)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID$2)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$3)) == null ? void 0 : _c.remove();
     },
     /** True if the panel currently exists in the DOM. */
     get isRendered() {
@@ -1646,6 +1646,15 @@
       order
     };
   }
+  function createDeletedMessage({ platform, conversationId, messageId }) {
+    return {
+      id: _generateId(),
+      platform,
+      conversationId,
+      messageId,
+      deletedAt: Date.now()
+    };
+  }
   async function appendToCollection(platform, conversationId, type, item) {
     const key = getNamespaceKey(platform, conversationId, type);
     const existing = await get(key) || [];
@@ -1678,9 +1687,9 @@
     }
     return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   }
-  const _listeners = /* @__PURE__ */ new Set();
-  function _notify(event, detail) {
-    _listeners.forEach((cb) => {
+  const _listeners$1 = /* @__PURE__ */ new Set();
+  function _notify$1(event, detail) {
+    _listeners$1.forEach((cb) => {
       try {
         cb(event, detail);
       } catch (e) {
@@ -1689,10 +1698,10 @@
     });
   }
   function onPinsChanged(cb) {
-    _listeners.add(cb);
+    _listeners$1.add(cb);
   }
   function offPinsChanged(cb) {
-    _listeners.delete(cb);
+    _listeners$1.delete(cb);
   }
   async function pinMessage(messageData) {
     const { messageId, platform, conversationId, role, text } = messageData;
@@ -1704,14 +1713,14 @@
       throw new Error(`[LM-Source][PinService] Failed to save pin for message ${messageId}`);
     }
     console.log(`[LM-Source][PinService] Pinned message ${messageId} (order ${order})`);
-    _notify("pinned", { pin });
+    _notify$1("pinned", { pin });
     return pin;
   }
   async function unpinMessage(pinId, platform, conversationId) {
     const ok = await removeFromCollection(platform, conversationId, DATA_TYPES.PIN, pinId);
     if (ok) {
       console.log(`[LM-Source][PinService] Unpinned pin ${pinId}`);
-      _notify("unpinned", { pinId, platform, conversationId });
+      _notify$1("unpinned", { pinId, platform, conversationId });
     }
     return ok;
   }
@@ -1744,7 +1753,7 @@
     }).filter(Boolean);
     const ok = await setCollection(platform, conversationId, DATA_TYPES.PIN, reordered);
     if (ok) {
-      _notify("reordered", { platform, conversationId, orderedPinIds });
+      _notify$1("reordered", { platform, conversationId, orderedPinIds });
     }
     return ok;
   }
@@ -1759,7 +1768,7 @@
     offPinsChanged
   });
   const TOOLBAR_ID = "lms-msg-toolbar";
-  const STYLE_ID$1 = "lms-toolbar-styles";
+  const STYLE_ID$2 = "lms-toolbar-styles";
   const DATA_MSG_ID = "data-lms-msg-id";
   const DATA_ROLE = "data-lms-role";
   const TOOLBAR_OFFSET_Y = 6;
@@ -1864,9 +1873,9 @@
     return document.getElementById(TOOLBAR_ID);
   }
   function createToolbar() {
-    if (document.getElementById(STYLE_ID$1)) return;
+    if (document.getElementById(STYLE_ID$2)) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID$1;
+    style.id = STYLE_ID$2;
     style.textContent = buildStyles$1();
     document.head.appendChild(style);
     const toolbar = document.createElement("div");
@@ -1982,7 +1991,7 @@
   function destroy() {
     var _a, _b;
     (_a = document.getElementById(TOOLBAR_ID)) == null ? void 0 : _a.remove();
-    (_b = document.getElementById(STYLE_ID$1)) == null ? void 0 : _b.remove();
+    (_b = document.getElementById(STYLE_ID$2)) == null ? void 0 : _b.remove();
     _actions.clear();
     clearTimeout(_hideTimer);
   }
@@ -1996,7 +2005,7 @@
   };
   const PANEL_ID = "lms-pinboard-panel";
   const TOGGLE_BTN_ID = "lms-pinboard-toggle";
-  const STYLE_ID = "lms-pinboard-styles";
+  const STYLE_ID$1 = "lms-pinboard-styles";
   const Z_INDEX = "2147483635";
   const ROLE_COLORS = {
     user: "#60a5fa",
@@ -2471,9 +2480,9 @@
       _pins = pins;
       _onUnpin = onUnpin || null;
       _onReorder = onReorder || null;
-      if (!document.getElementById(STYLE_ID)) {
+      if (!document.getElementById(STYLE_ID$1)) {
         const style = document.createElement("style");
-        style.id = STYLE_ID;
+        style.id = STYLE_ID$1;
         style.textContent = buildStyles();
         document.head.appendChild(style);
       }
@@ -2572,7 +2581,7 @@
       var _a, _b, _c;
       (_a = document.getElementById(PANEL_ID)) == null ? void 0 : _a.remove();
       (_b = document.getElementById(TOGGLE_BTN_ID)) == null ? void 0 : _b.remove();
-      (_c = document.getElementById(STYLE_ID)) == null ? void 0 : _c.remove();
+      (_c = document.getElementById(STYLE_ID$1)) == null ? void 0 : _c.remove();
       _pins = [];
     },
     get isOpen() {
@@ -2583,6 +2592,323 @@
       return !!getPanel();
     }
   };
+  const HIDDEN_CLASS = "lms-deleted-hidden";
+  const REVEALED_CLASS = "lms-deleted-revealed";
+  const STYLE_ID = "lms-delete-styles";
+  function ensureStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = `
+/* LM-Source — soft-deleted message state */
+
+/* Hidden: collapse with a fade-out and a subtle placeholder */
+.${HIDDEN_CLASS} {
+  position: relative;
+  overflow: hidden;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+/* Revealed: show with a dimmed, faded look so it's clearly not "real" */
+.${HIDDEN_CLASS}.${REVEALED_CLASS} {
+  max-height: 2000px !important;
+  opacity: 0.35 !important;
+  pointer-events: auto;
+  outline: 2px dashed rgba(239, 68, 68, 0.35) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+  filter: grayscale(40%);
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+/* "Deleted" badge shown when message is in revealed state */
+.${HIDDEN_CLASS}.${REVEALED_CLASS}::before {
+  content: '🗑 Deleted (local view only)';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(239, 68, 68, 0.7);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 4px;
+  padding: 2px 7px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Bulk-select checkbox overlay on message hover */
+.lms-bulk-checkbox {
+  position: absolute;
+  top: 10px;
+  left: -28px;
+  width: 18px;
+  height: 18px;
+  accent-color: #ef4444;
+  cursor: pointer;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.lms-bulk-mode [data-lms-msg-id] {
+  position: relative;
+}
+.lms-bulk-mode .lms-bulk-checkbox {
+  opacity: 1;
+}
+
+/* Bulk-mode banner */
+#lms-bulk-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483638;
+  background: rgba(15, 17, 27, 0.96);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 14px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: #e2e8f0;
+  backdrop-filter: blur(10px);
+}
+#lms-bulk-banner-count {
+  color: #f87171;
+  font-weight: 700;
+}
+.lms-bulk-action-btn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lms-bulk-action-btn.delete {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: #fff;
+}
+.lms-bulk-action-btn.delete:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+.lms-bulk-action-btn.cancel {
+  background: rgba(255,255,255,0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.lms-bulk-action-btn.cancel:hover { background: rgba(255,255,255,0.1); }
+`;
+    document.head.appendChild(style);
+  }
+  const _listeners = /* @__PURE__ */ new Set();
+  function _notify(event, detail) {
+    _listeners.forEach((cb) => {
+      try {
+        cb(event, detail);
+      } catch (e) {
+        console.error("[LM-Source][DeleteService] Listener error:", e);
+      }
+    });
+  }
+  function onDeletedChanged(cb) {
+    _listeners.add(cb);
+  }
+  function offDeletedChanged(cb) {
+    _listeners.delete(cb);
+  }
+  let _showDeleted = false;
+  function setDeletedVisible(visible) {
+    _showDeleted = visible;
+    document.querySelectorAll(`.${HIDDEN_CLASS}`).forEach((el) => {
+      el.classList.toggle(REVEALED_CLASS, visible);
+    });
+    _notify("visibilityChanged", { visible });
+  }
+  function getDeletedVisible() {
+    return _showDeleted;
+  }
+  async function _loadRecords(platform, conversationId) {
+    return getCollection(platform, conversationId, DATA_TYPES.DELETED);
+  }
+  async function _saveRecords(platform, conversationId, records) {
+    return setCollection(platform, conversationId, DATA_TYPES.DELETED, records);
+  }
+  function _findElement(messageId) {
+    return document.querySelector(`[data-lms-msg-id="${messageId}"]`);
+  }
+  function _hideElement(el) {
+    el.classList.add(HIDDEN_CLASS);
+    if (_showDeleted) el.classList.add(REVEALED_CLASS);
+  }
+  function _showElement(el) {
+    el.classList.remove(HIDDEN_CLASS, REVEALED_CLASS);
+  }
+  async function softDeleteMessage(messageId, platform, conversationId) {
+    ensureStyles();
+    const records = await _loadRecords(platform, conversationId);
+    if (records.find((r) => r.messageId === messageId)) {
+      return records.find((r) => r.messageId === messageId);
+    }
+    const record = createDeletedMessage({ platform, conversationId, messageId });
+    records.push(record);
+    await _saveRecords(platform, conversationId, records);
+    const el = _findElement(messageId);
+    if (el) _hideElement(el);
+    console.log(`[LM-Source][DeleteService] Soft-deleted message ${messageId}`);
+    _notify("deleted", { messageId, platform, conversationId });
+    return record;
+  }
+  async function restoreMessage(messageId, platform, conversationId) {
+    const records = await _loadRecords(platform, conversationId);
+    const updated = records.filter((r) => r.messageId !== messageId);
+    if (updated.length === records.length) return false;
+    await _saveRecords(platform, conversationId, updated);
+    const el = _findElement(messageId);
+    if (el) _showElement(el);
+    console.log(`[LM-Source][DeleteService] Restored message ${messageId}`);
+    _notify("restored", { messageId, platform, conversationId });
+    return true;
+  }
+  async function isDeleted(messageId, platform, conversationId) {
+    const records = await _loadRecords(platform, conversationId);
+    return records.some((r) => r.messageId === messageId);
+  }
+  async function getDeletedIds(platform, conversationId) {
+    const records = await _loadRecords(platform, conversationId);
+    return new Set(records.map((r) => r.messageId));
+  }
+  async function softDeleteBulk(messageIds, platform, conversationId) {
+    ensureStyles();
+    const records = await _loadRecords(platform, conversationId);
+    const existingIds = new Set(records.map((r) => r.messageId));
+    const newRecords = messageIds.filter((id) => !existingIds.has(id)).map((id) => createDeletedMessage({ platform, conversationId, messageId: id }));
+    await _saveRecords(platform, conversationId, [...records, ...newRecords]);
+    for (const id of messageIds) {
+      const el = _findElement(id);
+      if (el) _hideElement(el);
+    }
+    console.log(`[LM-Source][DeleteService] Bulk-deleted ${newRecords.length} message(s)`);
+    _notify("bulkDeleted", { messageIds, platform, conversationId });
+  }
+  async function restoreAll(platform, conversationId) {
+    const records = await _loadRecords(platform, conversationId);
+    for (const r of records) {
+      const el = _findElement(r.messageId);
+      if (el) _showElement(el);
+    }
+    await _saveRecords(platform, conversationId, []);
+    console.log(`[LM-Source][DeleteService] Restored all ${records.length} deleted message(s)`);
+    _notify("restoredAll", { platform, conversationId });
+  }
+  async function applyDeletedState(adapterRef, platform, conversationId) {
+    ensureStyles();
+    const deletedIds = await getDeletedIds(platform, conversationId);
+    if (deletedIds.size === 0) return 0;
+    let count = 0;
+    const elements = adapterRef.getMessageElements();
+    elements.forEach((el, idx) => {
+      const data = adapterRef.extractMessageData(el, idx);
+      if (!data) return;
+      if (deletedIds.has(data.messageId)) {
+        el.setAttribute("data-lms-msg-id", data.messageId);
+        _hideElement(el);
+        count++;
+      }
+    });
+    console.log(`[LM-Source][DeleteService] Re-applied hidden state to ${count} message(s) after load`);
+    return count;
+  }
+  let _bulkSelection = /* @__PURE__ */ new Set();
+  let _bulkMode = false;
+  let _onBulkCommit = null;
+  function enterBulkMode(messageElements, onCommit) {
+    if (_bulkMode) return;
+    _bulkMode = true;
+    _bulkSelection = /* @__PURE__ */ new Set();
+    _onBulkCommit = onCommit;
+    ensureStyles();
+    document.body.classList.add("lms-bulk-mode");
+    messageElements.forEach((el) => {
+      const msgId = el.getAttribute("data-lms-msg-id");
+      if (!msgId) return;
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.className = "lms-bulk-checkbox";
+      cb.dataset.msgId = msgId;
+      cb.addEventListener("change", () => {
+        if (cb.checked) {
+          _bulkSelection.add(msgId);
+        } else {
+          _bulkSelection.delete(msgId);
+        }
+        _updateBulkBanner();
+      });
+      el.appendChild(cb);
+    });
+    _showBulkBanner();
+  }
+  function _showBulkBanner() {
+    if (document.getElementById("lms-bulk-banner")) return;
+    const banner = document.createElement("div");
+    banner.id = "lms-bulk-banner";
+    banner.innerHTML = `
+    <span>Selected: <strong id="lms-bulk-banner-count">0</strong> message(s)</span>
+    <button class="lms-bulk-action-btn delete" id="lms-bulk-delete-btn">🗑 Delete Selected</button>
+    <button class="lms-bulk-action-btn cancel" id="lms-bulk-cancel-btn">Cancel</button>
+  `;
+    document.body.appendChild(banner);
+    document.getElementById("lms-bulk-delete-btn").addEventListener("click", () => {
+      const ids = [..._bulkSelection];
+      if (ids.length === 0) return;
+      if (typeof _onBulkCommit === "function") _onBulkCommit(ids);
+      exitBulkMode();
+    });
+    document.getElementById("lms-bulk-cancel-btn").addEventListener("click", exitBulkMode);
+  }
+  function _updateBulkBanner() {
+    const countEl = document.getElementById("lms-bulk-banner-count");
+    if (countEl) countEl.textContent = String(_bulkSelection.size);
+  }
+  function exitBulkMode() {
+    var _a;
+    _bulkMode = false;
+    _bulkSelection = /* @__PURE__ */ new Set();
+    _onBulkCommit = null;
+    document.body.classList.remove("lms-bulk-mode");
+    document.querySelectorAll(".lms-bulk-checkbox").forEach((el) => el.remove());
+    (_a = document.getElementById("lms-bulk-banner")) == null ? void 0 : _a.remove();
+  }
+  function isBulkMode() {
+    return _bulkMode;
+  }
+  const DeleteService = Object.freeze({
+    softDeleteMessage,
+    restoreMessage,
+    isDeleted,
+    getDeletedIds,
+    softDeleteBulk,
+    restoreAll,
+    applyDeletedState,
+    enterBulkMode,
+    exitBulkMode,
+    isBulkMode,
+    setDeletedVisible,
+    getDeletedVisible,
+    onDeletedChanged,
+    offDeletedChanged,
+    HIDDEN_CLASS,
+    REVEALED_CLASS
+  });
   const LOG_PREFIX = "[LM-Source]";
   const DEBOUNCE_MS = 400;
   const CONTAINER_POLL_INTERVAL_MS = 500;
@@ -2661,6 +2987,31 @@
       sendResponse({ success: true });
       return true;
     }
+    if ((request == null ? void 0 : request.type) === "LMS_TOGGLE_DELETED") {
+      const nowVisible = !DeleteService.getDeletedVisible();
+      DeleteService.setDeletedVisible(nowVisible);
+      sendResponse({ success: true, visible: nowVisible });
+      return true;
+    }
+    if ((request == null ? void 0 : request.type) === "LMS_BULK_DELETE_MODE") {
+      if (!adapter) {
+        sendResponse({ success: false });
+        return true;
+      }
+      if (DeleteService.isBulkMode()) {
+        DeleteService.exitBulkMode();
+        sendResponse({ success: true, mode: "off" });
+      } else {
+        const platform = adapter.getPlatformIdentifier();
+        const conversationId = adapter.getConversationId();
+        const elements = adapter.getMessageElements();
+        DeleteService.enterBulkMode(elements, async (selectedIds) => {
+          await DeleteService.softDeleteBulk(selectedIds, platform, conversationId);
+        });
+        sendResponse({ success: true, mode: "on" });
+      }
+      return true;
+    }
     return false;
   });
   document.addEventListener("lms:adapterReady", (e) => {
@@ -2674,6 +3025,7 @@
       }
     }, 1500);
     initPinFeature(readyAdapter, platform, conversationId);
+    initDeleteFeature(readyAdapter, platform, conversationId);
   });
   document.addEventListener("lms:messageAdded", (e) => {
     const { messageId, role, element } = e.detail;
@@ -2874,6 +3226,35 @@
       }
     });
     console.log(`${LOG_PREFIX} Pin feature initialised. ${pins.length} existing pin(s) loaded.`);
+  }
+  async function initDeleteFeature(adapterRef, platform, conversationId) {
+    MessageToolbar.registerAction("delete", {
+      icon: "🗑",
+      tooltip: "Delete message (local only)",
+      showFor: ["all"],
+      groupBefore: true,
+      // adds a visual divider after the pin button
+      onClick: async ({ messageId, element, button }) => {
+        const alreadyDeleted = await DeleteService.isDeleted(messageId, platform, conversationId);
+        if (alreadyDeleted) {
+          await DeleteService.restoreMessage(messageId, platform, conversationId);
+          button.setAttribute("data-tooltip", "Delete message (local only)");
+          button.classList.remove("lms-tb-active");
+          console.log(`${LOG_PREFIX} Restored message ${messageId}`);
+        } else {
+          await DeleteService.softDeleteMessage(messageId, platform, conversationId);
+          button.setAttribute("data-tooltip", "Restore message");
+          button.classList.add("lms-tb-active");
+          console.log(`${LOG_PREFIX} Soft-deleted message ${messageId}`);
+        }
+      }
+    });
+    setTimeout(async () => {
+      const count = await DeleteService.applyDeletedState(adapterRef, platform, conversationId);
+      if (count > 0) {
+        console.log(`${LOG_PREFIX} Restored hidden state for ${count} deleted message(s).`);
+      }
+    }, 2e3);
   }
   window.addEventListener("beforeunload", () => {
     if (messageObserver) {

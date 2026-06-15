@@ -11,6 +11,7 @@
 //     can subscribe to 'lms:messageAdded' and 'lms:tokenLimitWarning' events.
 //  6. (P2.2) Listen for LMS_EXTRACT_CONTEXT messages and trigger context extraction.
 //  7. (P2.3) Inject per-message toolbar with Pin action; manage Pinboard panel.
+//  8. (P2.4) Soft-delete toolbar action; bulk-delete mode; show/hide toggle.
 
 'use strict';
 
@@ -22,6 +23,7 @@ import { ContextSidePanel } from './components/ContextSidePanel.js';
 import PinService            from './services/pinService.js';
 import { MessageToolbar }   from './components/messageToolbar.js';
 import { PinboardPanel }    from './components/PinboardPanel.js';
+import DeleteService         from './services/deleteService.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -179,6 +181,32 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true;
   }
 
+  // P2.4 — Toggle show/hide deleted messages
+  if (request?.type === 'LMS_TOGGLE_DELETED') {
+    const nowVisible = !DeleteService.getDeletedVisible();
+    DeleteService.setDeletedVisible(nowVisible);
+    sendResponse({ success: true, visible: nowVisible });
+    return true;
+  }
+
+  // P2.4 — Enter/exit bulk-delete mode
+  if (request?.type === 'LMS_BULK_DELETE_MODE') {
+    if (!adapter) { sendResponse({ success: false }); return true; }
+    if (DeleteService.isBulkMode()) {
+      DeleteService.exitBulkMode();
+      sendResponse({ success: true, mode: 'off' });
+    } else {
+      const platform       = adapter.getPlatformIdentifier();
+      const conversationId = adapter.getConversationId();
+      const elements       = adapter.getMessageElements();
+      DeleteService.enterBulkMode(elements, async (selectedIds) => {
+        await DeleteService.softDeleteBulk(selectedIds, platform, conversationId);
+      });
+      sendResponse({ success: true, mode: 'on' });
+    }
+    return true;
+  }
+
   return false;
 });
 
@@ -199,6 +227,9 @@ document.addEventListener('lms:adapterReady', (e) => {
 
   // P2.3 — Init message toolbar + pinboard
   initPinFeature(readyAdapter, platform, conversationId);
+
+  // P2.4 — Init delete feature (register action + restore persisted state)
+  initDeleteFeature(readyAdapter, platform, conversationId);
 });
 
 // React to newly added messages: attach toolbar
@@ -518,6 +549,55 @@ async function initPinFeature(adapterRef, platform, conversationId) {
   });
 
   console.log(`${LOG_PREFIX} Pin feature initialised. ${pins.length} existing pin(s) loaded.`);
+}
+
+// ── P2.4 — Delete feature initialisation ─────────────────────────────────────
+
+/**
+ * Initialise the delete feature for the current conversation:
+ *   1. Register the 🗑 delete action on the shared MessageToolbar
+ *   2. Re-apply hidden state to already-deleted messages (persisted from last visit)
+ *
+ * Called from the lms:adapterReady handler after initPinFeature.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapterRef
+ * @param {string} platform
+ * @param {string} conversationId
+ */
+async function initDeleteFeature(adapterRef, platform, conversationId) {
+  // 1. Register delete toolbar action
+  MessageToolbar.registerAction('delete', {
+    icon: '🗑',
+    tooltip: 'Delete message (local only)',
+    showFor: ['all'],
+    groupBefore: true, // adds a visual divider after the pin button
+    onClick: async ({ messageId, element, button }) => {
+      const alreadyDeleted = await DeleteService.isDeleted(messageId, platform, conversationId);
+
+      if (alreadyDeleted) {
+        // Restore
+        await DeleteService.restoreMessage(messageId, platform, conversationId);
+        button.setAttribute('data-tooltip', 'Delete message (local only)');
+        button.classList.remove('lms-tb-active');
+        console.log(`${LOG_PREFIX} Restored message ${messageId}`);
+      } else {
+        // Soft-delete
+        await DeleteService.softDeleteMessage(messageId, platform, conversationId);
+        button.setAttribute('data-tooltip', 'Restore message');
+        button.classList.add('lms-tb-active');
+        console.log(`${LOG_PREFIX} Soft-deleted message ${messageId}`);
+      }
+    },
+  });
+
+  // 2. Re-apply persisted hidden state after a short delay
+  // (gives MutationObserver time to stamp data-lms-msg-id attributes)
+  setTimeout(async () => {
+    const count = await DeleteService.applyDeletedState(adapterRef, platform, conversationId);
+    if (count > 0) {
+      console.log(`${LOG_PREFIX} Restored hidden state for ${count} deleted message(s).`);
+    }
+  }, 2000);
 }
 
 // ── Cleanup on page unload ────────────────────────────────────────────────────

@@ -13,11 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Elements ─────────────────────────────────────────────────────────────
 
-  const platformIndicator = document.querySelector('.platform-indicator');
-  const statusText        = document.querySelector('.status-text');
-  const extractBtn        = document.getElementById('btn-extract');
-  const pinboardBtn       = document.getElementById('btn-pinboard');
-  const handoffBtn        = document.getElementById('btn-handoff');
+  const platformIndicator    = document.querySelector('.platform-indicator');
+  const statusText           = document.querySelector('.status-text');
+  const extractBtn           = document.getElementById('btn-extract');
+  const pinboardBtn          = document.getElementById('btn-pinboard');
+  const handoffBtn           = document.getElementById('btn-handoff');
+  const toggleDeletedBtn     = document.getElementById('btn-toggle-deleted');
+  const toggleDeletedLabel   = document.getElementById('btn-toggle-deleted-label');
+  const bulkDeleteBtn        = document.getElementById('btn-bulk-delete');
 
   // ── Platform detection ────────────────────────────────────────────────────
 
@@ -65,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function enableButtons() {
-    [extractBtn, pinboardBtn, handoffBtn].forEach(btn => {
+    [extractBtn, pinboardBtn, handoffBtn, toggleDeletedBtn, bulkDeleteBtn].forEach(btn => {
       btn.disabled = false;
     });
   }
@@ -112,6 +115,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle the panel on the page (useful when panel is already rendered)
     chrome.tabs.sendMessage(activeTabId, { type: 'LMS_TOGGLE_PANEL' });
     window.close();
+  });
+
+  // ── P2.4 — Show / Hide deleted messages ──────────────────────────────────
+  let _showingDeleted = false;
+
+  toggleDeletedBtn.addEventListener('click', () => {
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(
+      activeTabId,
+      { type: 'LMS_TOGGLE_DELETED' },
+      (response) => {
+        if (chrome.runtime.lastError || !response?.success) return;
+        _showingDeleted = response.visible;
+        if (toggleDeletedLabel) {
+          toggleDeletedLabel.textContent = _showingDeleted
+            ? '🙈 Hide Deleted'
+            : '👁 Show Deleted';
+        }
+        toggleDeletedBtn.classList.toggle('active-state', _showingDeleted);
+        // Don't close popup so user can toggle back easily
+      }
+    );
+  });
+
+  // ── P2.4 — Bulk delete mode ───────────────────────────────────────────────
+  let _bulkModeOn = false;
+
+  bulkDeleteBtn.addEventListener('click', () => {
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(
+      activeTabId,
+      { type: 'LMS_BULK_DELETE_MODE' },
+      (response) => {
+        if (chrome.runtime.lastError || !response?.success) return;
+        _bulkModeOn = response.mode === 'on';
+        bulkDeleteBtn.querySelector('span').textContent = _bulkModeOn
+          ? '✕ Exit Bulk Mode'
+          : '🗑 Bulk Delete';
+        bulkDeleteBtn.classList.toggle('active-state', _bulkModeOn);
+        if (_bulkModeOn) window.close(); // Close popup so user can click checkboxes
+      }
+    );
   });
 
   // ── Helpers ───────────────────────────────────────────────────────────────

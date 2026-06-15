@@ -181,23 +181,29 @@ Allow users to pin key messages to a Pinboard. Data persists via the Storage Ser
 ---
 
 ### Task P2.4 — Feature F-03: Delete Non-Required Messages
-**Status:** ⏳ Pending | **Difficulty:** Low | **Blocker for:** None (but depends on P2.1)
+**Status:** ✅ Done | **Difficulty:** Low | **Blocker for:** None (but depends on P2.1)
 
 Implement a soft-delete mechanism for messages (view-layer only). Data persists via the Storage Service (P1.3).
 
 **Deliverables:**
-- Delete icon on message hover.
-- `src/services/deleteService.js`
-- Bulk delete mode.
-- Toggle to show/hide deleted messages.
+- `src/services/deleteService.js` ✅ — soft-delete CRUD, bulk ops, show/hide toggle, restore-on-load
+- 🗑 Delete toolbar button on message hover ✅ (via shared `MessageToolbar` registry)
+- Bulk delete mode with floating checkbox banner ✅
+- 👁 Show/Hide deleted toggle in popup ✅ — dims messages, shows "Deleted" badge
+- State persists across page refreshes via `applyDeletedState()` ✅
+
+**Architecture:**
+- **Soft-delete only** — no LLM data mutated; purely DOM `max-height: 0 + opacity: 0`.
+- **CSS classes:** `lms-deleted-hidden` (hide), `lms-deleted-revealed` (dim/show with dashed red outline).
+- **Bulk mode:** `enterBulkMode()` injects checkboxes + floating banner into the page.
+- **Restore on refresh:** `applyDeletedState()` called 2s after `lms:adapterReady` re-hides all stored IDs.
 
 **Action Steps:**
-1. In `src/content.js`, add a "Delete" icon on hover for messages.
-2. `deleteService.js`: define `softDeleteMessage(messageId)`. Store the ID in `chrome.storage.local`.
-3. When a message is soft-deleted, apply a CSS class (e.g., `lm-source-hidden`) to it in the DOM to hide it.
-4. Add a "Show/Hide Deleted" toggle button (perhaps in the popup or a floating toolbar) that removes/adds the CSS class.
-5. Implement bulk delete mode: allow the user to select multiple messages (checkboxes) and click a "Delete Selected" button.
-6. Verify that refreshing the page hides the messages correctly based on stored IDs (using the adapter to match messages).
+1. ✅ `deleteService.js`: `softDeleteMessage()`, `restoreMessage()`, `isDeleted()`, `softDeleteBulk()`, `restoreAll()`, `applyDeletedState()`.
+2. ✅ `MessageToolbar.registerAction('delete', …)` — toggle delete/restore on click.
+3. ✅ `enterBulkMode()` — checkbox overlay + floating delete banner.
+4. ✅ `popup.html/js`: 👁 Show Deleted + 🗑 Bulk Delete buttons; state reflected in button label.
+5. ✅ `content.js`: `LMS_TOGGLE_DELETED` and `LMS_BULK_DELETE_MODE` message handlers.
 
 ---
 

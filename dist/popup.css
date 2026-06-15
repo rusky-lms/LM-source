@@ -105,6 +105,28 @@ body {
   cursor: not-allowed;
 }
 
+/* Secondary feature buttons (smaller, less prominent) */
+.secondary-buttons {
+  margin-top: 2px;
+}
+
+.secondary-btn {
+  background-color: rgba(30, 30, 50, 0.6) !important;
+  border-color: #2a2a4a !important;
+  font-size: 12px !important;
+  padding: 7px 10px !important;
+  color: #7a7a9a !important;
+}
+.secondary-btn:hover:not(:disabled) {
+  background-color: #2a2a4a !important;
+  color: #c0c0d8 !important;
+}
+.secondary-btn.active-state {
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  color: #f87171 !important;
+  background-color: rgba(239, 68, 68, 0.08) !important;
+}
+
 /* Settings Link */
 .settings-link {
   margin-top: 8px;

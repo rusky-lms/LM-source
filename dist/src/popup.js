@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const extractBtn = document.getElementById("btn-extract");
   const pinboardBtn = document.getElementById("btn-pinboard");
   const handoffBtn = document.getElementById("btn-handoff");
+  const toggleDeletedBtn = document.getElementById("btn-toggle-deleted");
+  const toggleDeletedLabel = document.getElementById("btn-toggle-deleted-label");
+  const bulkDeleteBtn = document.getElementById("btn-bulk-delete");
   let activeTabId = null;
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (!tabs || tabs.length === 0) return;
@@ -78,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusText.style.color = "#94a3b8";
   }
   function enableButtons() {
-    [extractBtn, pinboardBtn, handoffBtn].forEach((btn) => {
+    [extractBtn, pinboardBtn, handoffBtn, toggleDeletedBtn, bulkDeleteBtn].forEach((btn) => {
       btn.disabled = false;
     });
   }
@@ -114,6 +117,37 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activeTabId === null) return;
     chrome.tabs.sendMessage(activeTabId, { type: "LMS_TOGGLE_PANEL" });
     window.close();
+  });
+  let _showingDeleted = false;
+  toggleDeletedBtn.addEventListener("click", () => {
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(
+      activeTabId,
+      { type: "LMS_TOGGLE_DELETED" },
+      (response) => {
+        if (chrome.runtime.lastError || !(response == null ? void 0 : response.success)) return;
+        _showingDeleted = response.visible;
+        if (toggleDeletedLabel) {
+          toggleDeletedLabel.textContent = _showingDeleted ? "🙈 Hide Deleted" : "👁 Show Deleted";
+        }
+        toggleDeletedBtn.classList.toggle("active-state", _showingDeleted);
+      }
+    );
+  });
+  let _bulkModeOn = false;
+  bulkDeleteBtn.addEventListener("click", () => {
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(
+      activeTabId,
+      { type: "LMS_BULK_DELETE_MODE" },
+      (response) => {
+        if (chrome.runtime.lastError || !(response == null ? void 0 : response.success)) return;
+        _bulkModeOn = response.mode === "on";
+        bulkDeleteBtn.querySelector("span").textContent = _bulkModeOn ? "✕ Exit Bulk Mode" : "🗑 Bulk Delete";
+        bulkDeleteBtn.classList.toggle("active-state", _bulkModeOn);
+        if (_bulkModeOn) window.close();
+      }
+    );
   });
   function showError(msg) {
     const existing = document.getElementById("lms-popup-error");
