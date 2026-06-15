@@ -11,8 +11,20 @@
     });
   });
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("[LM-Source] Message received in background:", request);
-    sendResponse({ status: "Background received message" });
+    const type = request == null ? void 0 : request.type;
+    console.log("[LM-Source] Background received message:", type, request);
+    if (type === "LMS_OPEN_URL") {
+      const url = request.url;
+      if (!url || typeof url !== "string") {
+        sendResponse({ success: false, error: "Invalid URL" });
+        return false;
+      }
+      chrome.tabs.create({ url }, (tab) => {
+        sendResponse({ success: true, tabId: tab == null ? void 0 : tab.id });
+      });
+      return true;
+    }
+    sendResponse({ status: "Background received message", type });
     return true;
   });
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

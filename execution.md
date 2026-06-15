@@ -107,22 +107,43 @@ Build the robustness layer for interacting with Claude.ai, ChatGPT, **and Google
 ---
 
 ### Task P2.2 — Feature F-01: Context Extraction
-**Status:** ⏳ Pending | **Difficulty:** High | **Blocker for:** None (but depends on P2.1)
+**Status:** ✅ Done | **Difficulty:** High | **Blocker for:** None (but depends on P2.1)
 
-Analyze the current chat and extract topics, key entities, and a brief summary.
+Analyse the current chat and extract topics, key entities, decisions, next steps, code blocks, and a brief summary. Package into the structured handoff template.
 
 **Deliverables:**
-- `src/services/contextExtractor.js`
-- `src/components/ContextSidePanel.jsx` (or similar)
-- Triggered via extension icon (reads from adapter) or `chrome.action.onClicked` if no popup is currently open (as a basic entry point).
+- `src/services/contextExtractor.js` ✅
+- `src/components/ContextSidePanel.js` ✅
+- Triggered via popup "Extract Context" button or auto-rendered on page load.
+
+**Analysis passes implemented:**
+- **Code block extraction:** Fenced (\`\`\`lang...\`\`\`) and inline (\`code\`) via regex `CODE_BLOCK_REGEX`.
+- **Decision detection:** `DECISION_PATTERNS` — 8 high-signal phrase patterns ("let's go with", "we'll use", "conclusion", "the solution is", etc.).
+- **Next-step detection:** `NEXT_STEP_PATTERNS` — 7 patterns ("next:", "step N", "todo:", "run", "deploy", etc.).
+- **Topic / entity mining:** Domain keyword bank + capitalised noun phrases, sorted by frequency.
+- **Condensed summary:** Last 6 messages verbatim; older ones truncated to last sentence (≤ 300 chars).
+- **Handoff prompt:** Structured template with `[SYSTEM PREAMBLE]`, `[CONTEXT SUMMARY]`, `[KEY DECISIONS]`, `[CODE]`, `[NEXT STEPS]`, `[RECENT EXCHANGE]`, `[CONFIRMATION REQUEST]`.
+
+**Side Panel tabs:**
+1. **Summary** — topic pills, message stats, code/decision counts.
+2. **Decisions** — decision cards (yellow left-border) + next-step cards (green left-border).
+3. **Code (N)** — extracted code blocks with language label and one-click copy.
+4. **Timeline** — condensed message thread; verbatim messages highlighted.
+5. **Handoff** — read-only textarea with the full handoff prompt + Copy + Open Claude/ChatGPT/Gemini buttons.
+
+**Message flow:**
+- Popup `btn-extract` → `tabs.sendMessage({ type: 'LMS_EXTRACT_CONTEXT' })` → content script → `extractContext(adapter)` → `ContextSidePanel.render()` → panel opens.
+- Panel "Open [Platform]" buttons → `chrome.runtime.sendMessage({ type: 'LMS_OPEN_URL' })` → background → `chrome.tabs.create()`.
+- Auto-renders (panel closed) on `lms:adapterReady` event after 1.5 s, so the floating toggle button is always visible.
 
 **Action Steps:**
-1. Implement `extractContext(adapter)` that iterates messages using the adapter.
-2. For the MVP, use a simple heuristic (e.g., keyword extraction, looking for code blocks, specific leading phrases like "In summary...") to identify topics and entities.
-3. Generate a condensed summary of the conversation thread.
-4. Create a side panel HTML structure (injecting it into the LLM's page DOM or as a separate popup).
-5. Render the extracted context in the side panel.
-6. Trigger via the extension icon and verify the correct summary appears.
+1. ✅ Implement `extractContext(adapter)` iterating messages via the adapter.
+2. ✅ Regex-based code block extraction (fenced + inline), decision patterns, next-step patterns.
+3. ✅ `mineTopics()` — domain keywords + capitalised noun phrases.
+4. ✅ `condenseMessages()` — last N verbatim, older truncated.
+5. ✅ `buildHandoffPrompt()` — structured template.
+6. ✅ `ContextSidePanel.render()` — 5-tab injected panel with copy actions.
+7. ✅ Popup button wired; background `LMS_OPEN_URL` handler added.
 
 ---
 

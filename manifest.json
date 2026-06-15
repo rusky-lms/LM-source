@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LM-Source",
   "version": "1.1.0",
-  "description": "Enhance your LLM experience on Claude.ai, ChatGPT, and Google Gemini with context extraction, pinning, editing, and cross-platform handoff.",
+  "description": "Supercharge Claude, ChatGPT & Gemini: extract context, pin messages, edit AI responses, and hand off conversations seamlessly.",
   "icons": {
     "16": "logo-icon16.png",
     "48": "logo-icon48.png",

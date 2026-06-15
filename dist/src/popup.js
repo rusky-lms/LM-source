@@ -38,34 +38,97 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("[LM-Source] Popup script loaded.");
   const platformIndicator = document.querySelector(".platform-indicator");
+  const statusText = document.querySelector(".status-text");
   const extractBtn = document.getElementById("btn-extract");
   const pinboardBtn = document.getElementById("btn-pinboard");
   const handoffBtn = document.getElementById("btn-handoff");
+  let activeTabId = null;
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const url = new URL(tabs[0].url);
+    if (!tabs || tabs.length === 0) return;
+    const tab = tabs[0];
+    activeTabId = tab.id;
+    let url;
+    try {
+      url = new URL(tab.url);
+    } catch (_) {
+      setUnsupported();
+      return;
+    }
     const hostname = url.hostname;
     if (hostname.includes("claude.ai")) {
-      platformIndicator.textContent = "Platform: Claude.ai";
-      enableButtons();
+      setSupported("Claude.ai", "#7c3aed");
     } else if (hostname.includes("chat.openai.com") || hostname.includes("chatgpt.com")) {
-      platformIndicator.textContent = "Platform: ChatGPT";
-      enableButtons();
+      setSupported("ChatGPT", "#10a37f");
+    } else if (hostname.includes("gemini.google.com")) {
+      setSupported("Google Gemini", "#4285f4");
     } else {
-      platformIndicator.textContent = "Platform: Unsupported";
+      setUnsupported();
     }
   });
+  function setSupported(platformName, accentColor) {
+    platformIndicator.textContent = `Platform: ${platformName}`;
+    platformIndicator.style.color = accentColor;
+    statusText.textContent = "LM-Source Ready ✓";
+    enableButtons();
+  }
+  function setUnsupported() {
+    platformIndicator.textContent = "Platform: Unsupported";
+    platformIndicator.style.color = "#ef4444";
+    statusText.textContent = "Open Claude, ChatGPT or Gemini to get started.";
+    statusText.style.color = "#94a3b8";
+  }
   function enableButtons() {
     [extractBtn, pinboardBtn, handoffBtn].forEach((btn) => {
       btn.disabled = false;
     });
   }
   extractBtn.addEventListener("click", () => {
-    console.log("[LM-Source] Extract Context clicked");
+    if (activeTabId === null) return;
+    extractBtn.disabled = true;
+    extractBtn.querySelector("span").textContent = "Extracting…";
+    chrome.tabs.sendMessage(
+      activeTabId,
+      { type: "LMS_EXTRACT_CONTEXT" },
+      (response) => {
+        extractBtn.disabled = false;
+        extractBtn.querySelector("span").textContent = "Extract Context";
+        if (chrome.runtime.lastError) {
+          console.warn("[LM-Source] Popup: sendMessage error:", chrome.runtime.lastError.message);
+          showError("Could not reach content script. Reload the page and try again.");
+          return;
+        }
+        if (response == null ? void 0 : response.success) {
+          window.close();
+        } else {
+          showError((response == null ? void 0 : response.error) || "Unknown error during extraction.");
+        }
+      }
+    );
   });
   pinboardBtn.addEventListener("click", () => {
     console.log("[LM-Source] Pinboard clicked");
   });
   handoffBtn.addEventListener("click", () => {
-    console.log("[LM-Source] Context Handoff clicked");
+    if (activeTabId === null) return;
+    chrome.tabs.sendMessage(activeTabId, { type: "LMS_TOGGLE_PANEL" });
+    window.close();
   });
+  function showError(msg) {
+    const existing = document.getElementById("lms-popup-error");
+    if (existing) existing.remove();
+    const err = document.createElement("p");
+    err.id = "lms-popup-error";
+    err.style.cssText = [
+      "color:#ef4444",
+      "font-size:11px",
+      "margin-top:8px",
+      "padding:6px 10px",
+      "background:rgba(239,68,68,0.1)",
+      "border:1px solid rgba(239,68,68,0.25)",
+      "border-radius:6px"
+    ].join(";");
+    err.textContent = msg;
+    document.querySelector(".popup-content").appendChild(err);
+    setTimeout(() => err.remove(), 5e3);
+  }
 });

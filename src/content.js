@@ -9,12 +9,15 @@
 //  4. Run a debounced MutationObserver on the chat container to detect new messages.
 //  5. Expose a lightweight internal event bus so feature modules (P2.2–P2.7)
 //     can subscribe to 'lms:messageAdded' and 'lms:tokenLimitWarning' events.
+//  6. (P2.2) Listen for LMS_EXTRACT_CONTEXT messages and trigger context extraction.
 
 'use strict';
 
-import { ClaudeAdapter } from './adapters/claudeAdapter.js';
-import { ChatGPTAdapter } from './adapters/chatgptAdapter.js';
-import { GeminiAdapter } from './adapters/geminiAdapter.js';
+import { ClaudeAdapter }    from './adapters/claudeAdapter.js';
+import { ChatGPTAdapter }   from './adapters/chatgptAdapter.js';
+import { GeminiAdapter }    from './adapters/geminiAdapter.js';
+import { extractContext }   from './services/contextExtractor.js';
+import { ContextSidePanel } from './components/ContextSidePanel.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -121,6 +124,69 @@ async function init(adapter) {
   // reload, so we listen for URL changes and re-initialise when the path changes.
   watchForNavigation(adapter);
 }
+
+// ── P2.2 — Context Extraction wiring ─────────────────────────────────────────
+
+/**
+ * Run context extraction against the current adapter and render the side panel.
+ * Called from the popup via chrome.runtime.sendMessage or on demand.
+ *
+ * @param {import('./adapters/baseAdapter.js').PlatformAdapter} adapterRef
+ */
+function runContextExtraction(adapterRef) {
+  const ctx = extractContext(adapterRef);
+  if (!ctx) {
+    console.warn(`${LOG_PREFIX} Context extraction returned nothing.`);
+    return;
+  }
+
+  ContextSidePanel.render(ctx, {
+    onRefresh: () => runContextExtraction(adapterRef),
+  });
+  ContextSidePanel.open();
+}
+
+// Listen for messages from the popup / background
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+  if (request?.type === 'LMS_EXTRACT_CONTEXT') {
+    if (!adapter) {
+      sendResponse({ success: false, error: 'No adapter active on this page.' });
+      return true;
+    }
+    try {
+      runContextExtraction(adapter);
+      sendResponse({ success: true });
+    } catch (err) {
+      console.error(`${LOG_PREFIX} Context extraction error:`, err);
+      sendResponse({ success: false, error: err.message });
+    }
+    return true; // keep channel open for async
+  }
+
+  if (request?.type === 'LMS_TOGGLE_PANEL') {
+    ContextSidePanel.toggle();
+    sendResponse({ success: true });
+    return true;
+  }
+
+  return false;
+});
+
+// Auto-render the side panel (without opening it) once the adapter is ready,
+// so the floating toggle button appears as soon as the page loads.
+document.addEventListener('lms:adapterReady', (e) => {
+  const { adapter: readyAdapter } = e.detail;
+  // Small delay to let the host page settle before we scan messages
+  setTimeout(() => {
+    const ctx = extractContext(readyAdapter);
+    if (ctx) {
+      ContextSidePanel.render(ctx, {
+        onRefresh: () => runContextExtraction(readyAdapter),
+      });
+      // Panel starts closed; user opens via toggle button or popup
+    }
+  }, 1500);
+});
 
 // ── Chat container polling ────────────────────────────────────────────────────
 

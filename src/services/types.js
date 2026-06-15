@@ -71,4 +71,32 @@
  * @property {number} usedPercent  - Ratio 0–1
  */
 
+/**
+ * @typedef {{ sentence: string, messageId: string, role: string }} ContextSignal
+ */
+
+/**
+ * @typedef {{ raw: string, language: string, code: string, messageId: string }} ExtractedCodeBlock
+ */
+
+/**
+ * @typedef {{ messageId: string, role: string, text: string, verbatim: boolean }} CondensedMessage
+ */
+
+/**
+ * @typedef {object} ExtractedContext
+ * @property {string}             platform        - 'claude' | 'chatgpt' | 'gemini' | 'unknown'
+ * @property {string}             conversationId  - Adapter-derived conversation ID
+ * @property {number}             totalMessages   - Count of all processed messages
+ * @property {number}             userCount       - Count of user messages
+ * @property {number}             assistantCount  - Count of assistant messages
+ * @property {string[]}           topics          - Mined keyword/entity topics (sorted by frequency)
+ * @property {ContextSignal[]}    decisions       - Sentences matching DECISION_PATTERNS
+ * @property {ContextSignal[]}    nextSteps       - Sentences matching NEXT_STEP_PATTERNS
+ * @property {ExtractedCodeBlock[]} codeBlocks    - Fenced code blocks extracted verbatim
+ * @property {CondensedMessage[]} condensed       - All messages; last N are verbatim, older are truncated
+ * @property {string}             handoffPrompt   - Fully formatted structured handoff template
+ * @property {number}             extractedAt     - Unix ms timestamp of extraction
+ */
+
 export {};

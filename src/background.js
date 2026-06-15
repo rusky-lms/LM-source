@@ -1,36 +1,62 @@
 // src/background.js
 // Service Worker for LM-Source Extension
-// Currently a minimal scaffold - logic will be added in later tasks
+//
+// Handles:
+//   - Extension install / update lifecycle
+//   - Message routing between content scripts and popup
+//   - LMS_OPEN_URL: opens a new tab (used by ContextSidePanel handoff buttons)
+
+'use strict';
 
 console.log('[LM-Source] Background service worker started.');
 
-// Listen for extension installation or update
+// ── Extension lifecycle ───────────────────────────────────────────────────────
+
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('[LM-Source] Extension installed or updated:', details.reason);
-  
-  // Initialize default settings in storage
+
   chrome.storage.local.set({
     'lm-source-initialized': true,
-    'lm-source-version': '1.1.0'
+    'lm-source-version': '1.1.0',
   }, () => {
     console.log('[LM-Source] Default settings initialized.');
   });
 });
 
-// Listen for messages from content scripts or popup
+// ── Message routing ───────────────────────────────────────────────────────────
+//
+// Known message types (grow with each phase):
+//   LMS_EXTRACT_CONTEXT  — popup → content script (forwarded directly via tabs.sendMessage)
+//   LMS_TOGGLE_PANEL     — popup → content script
+//   LMS_OPEN_URL         — content script → background (open a new tab)
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('[LM-Source] Message received in background:', request);
-  
-  // TODO: Handle various message types in later tasks
-  // e.g., 'EXTRACT_CONTEXT', 'PIN_MESSAGE', 'HANDOFF_CONTEXT'
-  
-  sendResponse({ status: 'Background received message' });
-  return true; // Keep channel open for async responses
+  const type = request?.type;
+  console.log('[LM-Source] Background received message:', type, request);
+
+  // ── Open a URL in a new tab (used by panel's "Open Claude / ChatGPT / Gemini" buttons)
+  if (type === 'LMS_OPEN_URL') {
+    const url = request.url;
+    if (!url || typeof url !== 'string') {
+      sendResponse({ success: false, error: 'Invalid URL' });
+      return false;
+    }
+    chrome.tabs.create({ url }, (tab) => {
+      sendResponse({ success: true, tabId: tab?.id });
+    });
+    return true; // keep channel open for async
+  }
+
+  // ── Default: echo back for debugging
+  sendResponse({ status: 'Background received message', type });
+  return true;
 });
 
-// Listen for tab updates (useful for detecting page loads)
+// ── Tab update tracking ───────────────────────────────────────────────────────
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
     console.log('[LM-Source] Tab updated:', tab.url);
   }
 });
+
