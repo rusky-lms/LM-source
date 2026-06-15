@@ -11,10 +11,10 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background-color: #1a1a2e;
-  color: #e0e0e0;
-  min-width: 300px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(160deg, #0d1117 0%, #131b2e 100%);
+  color: #e2e8f0;
+  min-width: 320px;
   min-height: 280px;
 }
 
@@ -80,20 +80,22 @@ body {
   align-items: center;
   justify-content: center;
   padding: 10px 14px;
-  background-color: #2a2a4a;
-  color: #e0e0e0;
-  border: 1px solid #3a3a5a;
+  background: rgba(255, 255, 255, 0.03);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .feature-btn:hover:not(:disabled) {
-  background-color: #3a3a5a;
-  border-color: #4a4a6a;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .feature-btn:active:not(:disabled) {

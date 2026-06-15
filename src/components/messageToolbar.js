@@ -53,24 +53,27 @@ function buildStyles() {
 }
 
 .lms-tb-btn {
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
   padding: 5px 6px;
   border-radius: 7px;
-  font-size: 14px;
-  line-height: 1;
   color: #94a3b8;
-  transition: background 0.13s, color 0.13s, transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .lms-tb-btn:hover {
-  background: rgba(99,102,241,0.15);
-  color: #e2e8f0;
-  transform: scale(1.1);
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.lms-tb-btn:active {
+  transform: translateY(0);
 }
 .lms-tb-btn.lms-tb-active {
   color: #818cf8;
