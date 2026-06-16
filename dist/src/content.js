@@ -801,17 +801,43 @@
   }
   function extractContext(adapter2) {
     const elements = adapter2.getMessageElements();
+    const platform = adapter2.getPlatformIdentifier();
+    const conversationId = adapter2.getConversationId();
     if (elements.length === 0) {
-      console.warn("[LM-Source][ContextExtractor] No message elements found.");
-      return null;
+      console.warn("[LM-Source][ContextExtractor] No message elements found. Returning empty context.");
+      return {
+        platform,
+        conversationId,
+        totalMessages: 0,
+        userCount: 0,
+        assistantCount: 0,
+        topics: [],
+        decisions: [],
+        nextSteps: [],
+        codeBlocks: [],
+        condensed: [],
+        handoffPrompt: "",
+        extractedAt: Date.now()
+      };
     }
     const messages = elements.map((el, idx) => adapter2.extractMessageData(el, idx)).filter(Boolean).filter((msg) => msg.text && msg.text.trim());
     if (messages.length === 0) {
-      console.warn("[LM-Source][ContextExtractor] Messages found but text extraction yielded nothing.");
-      return null;
+      console.warn("[LM-Source][ContextExtractor] Messages found but text extraction yielded nothing. Returning empty context.");
+      return {
+        platform,
+        conversationId,
+        totalMessages: 0,
+        userCount: 0,
+        assistantCount: 0,
+        topics: [],
+        decisions: [],
+        nextSteps: [],
+        codeBlocks: [],
+        condensed: [],
+        handoffPrompt: "",
+        extractedAt: Date.now()
+      };
     }
-    const platform = adapter2.getPlatformIdentifier();
-    const conversationId = adapter2.getConversationId();
     const userCount = messages.filter((m) => m.role === "user").length;
     const assistantCount = messages.filter((m) => m.role === "assistant").length;
     const { decisions, nextSteps, codeBlocks } = analyseMessages(messages);
@@ -1463,16 +1489,17 @@
         }
       });
     });
-    const platformUrls = {
-      "#lms-open-claude": "https://claude.ai/new",
-      "#lms-open-chatgpt": "https://chatgpt.com/",
-      "#lms-open-gemini": "https://gemini.google.com/"
+    const handoffTargets = {
+      "#lms-open-claude": "claude",
+      "#lms-open-chatgpt": "chatgpt",
+      "#lms-open-gemini": "gemini"
     };
-    for (const [selector, url] of Object.entries(platformUrls)) {
+    for (const [selector, targetPlatform] of Object.entries(handoffTargets)) {
       (_d = panel.querySelector(selector)) == null ? void 0 : _d.addEventListener("click", () => {
         chrome.runtime.sendMessage({
-          type: "LMS_OPEN_URL",
-          url
+          type: "LMS_DELIVER_HANDOFF_NEW_TAB",
+          targetPlatform,
+          prompt: ctx.handoffPrompt
         });
       });
     }
@@ -2112,6 +2139,18 @@
   0%, 100% { transform: rotate(-8deg); }
   50%       { transform: rotate(8deg); }
 }
+
+/* Message highlight flash — uses !important to override host page CSS */
+@keyframes lms-pb-highlight-flash {
+  0%   { box-shadow: 0 0 0px rgba(251,191,36,0); background-color: transparent; }
+  20%  { box-shadow: 0 0 28px rgba(251,191,36,0.8) !important; background-color: rgba(251,191,36,0.22) !important; }
+  80%  { box-shadow: 0 0 28px rgba(251,191,36,0.6) !important; background-color: rgba(251,191,36,0.18) !important; }
+  100% { box-shadow: 0 0 0px rgba(251,191,36,0); background-color: transparent; }
+}
+.lms-pb-highlight {
+  animation: lms-pb-highlight-flash 2.5s ease forwards !important;
+  border-radius: 6px !important;
+}
 .lms-pb-close-btn {
   background: none;
   border: none;
@@ -2484,13 +2523,34 @@
         if (msgId) {
           const msgEl = document.querySelector(`[data-lms-msg-id="${msgId}"]`);
           if (msgEl) {
-            msgEl.scrollIntoView({ behavior: "smooth", block: "center" });
-            msgEl.style.transition = "box-shadow 0.3s ease";
-            const oldShadow = msgEl.style.boxShadow;
-            msgEl.style.boxShadow = "0 0 15px rgba(251, 191, 36, 0.5)";
+            PinboardPanel.close();
             setTimeout(() => {
-              msgEl.style.boxShadow = oldShadow;
-            }, 2e3);
+              const getScrollParent = (el) => {
+                let node = el.parentElement;
+                while (node) {
+                  const style = window.getComputedStyle(node);
+                  const overflow = style.overflow + style.overflowY;
+                  if (/auto|scroll/.test(overflow) && node.scrollHeight > node.clientHeight) {
+                    return node;
+                  }
+                  node = node.parentElement;
+                }
+                return window;
+              };
+              const scroller = getScrollParent(msgEl);
+              const elRect = msgEl.getBoundingClientRect();
+              if (scroller === window) {
+                window.scrollBy({ top: elRect.top - window.innerHeight / 2, behavior: "smooth" });
+              } else {
+                const scrollerRect = scroller.getBoundingClientRect();
+                scroller.scrollBy({
+                  top: elRect.top - scrollerRect.top - scroller.clientHeight / 2 + msgEl.offsetHeight / 2,
+                  behavior: "smooth"
+                });
+              }
+              msgEl.classList.add("lms-pb-highlight");
+              setTimeout(() => msgEl.classList.remove("lms-pb-highlight"), 2600);
+            }, 350);
           } else {
             console.warn("[LM-Source] Target message not found in DOM.");
           }
@@ -4801,7 +4861,9 @@
         console.log(`${LOG_PREFIX} Pending handoff detected. Injecting...`);
         const prompt = res.lms_pending_handoff;
         chrome.storage.local.remove(["lms_pending_handoff"]);
-        setTimeout(() => {
+        const maxRetries = 20;
+        let retries = 0;
+        const tryInject = () => {
           const textareas = Array.from(document.querySelectorAll('textarea, [contenteditable="true"]'));
           const editor = textareas.sort((a, b) => b.offsetHeight - a.offsetHeight)[0];
           if (editor) {
@@ -4812,8 +4874,15 @@
             } else {
               document.execCommand("insertText", false, prompt);
             }
+            console.log(`${LOG_PREFIX} Successfully injected handoff prompt into editor.`);
+          } else if (retries < maxRetries) {
+            retries++;
+            setTimeout(tryInject, 500);
+          } else {
+            console.warn(`${LOG_PREFIX} Failed to find editor to inject handoff prompt.`);
           }
-        }, 2e3);
+        };
+        setTimeout(tryInject, 1e3);
       }
     });
     window.addEventListener("lms:tokenLimitWarning", () => {

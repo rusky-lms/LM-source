@@ -743,7 +743,10 @@ function initHandoffFeature(adapterRef, platform, conversationId) {
       // We don't have adapter specific injection methods yet, so we write to clipboard 
       // and alert the user, or try to inject if we know the selector.
       // A simple heuristic: find the largest textarea
-      setTimeout(() => {
+      // Poll for it, since SPAs may take several seconds to boot and render the input box.
+      const maxRetries = 20;
+      let retries = 0;
+      const tryInject = () => {
         const textareas = Array.from(document.querySelectorAll('textarea, [contenteditable="true"]'));
         const editor = textareas.sort((a,b) => b.offsetHeight - a.offsetHeight)[0];
         if (editor) {
@@ -756,8 +759,17 @@ function initHandoffFeature(adapterRef, platform, conversationId) {
             // ContentEditable
             document.execCommand('insertText', false, prompt);
           }
+          console.log(`${LOG_PREFIX} Successfully injected handoff prompt into editor.`);
+        } else if (retries < maxRetries) {
+          retries++;
+          setTimeout(tryInject, 500);
+        } else {
+          console.warn(`${LOG_PREFIX} Failed to find editor to inject handoff prompt.`);
         }
-      }, 2000); // Wait for UI to render
+      };
+      
+      // Start polling
+      setTimeout(tryInject, 1000);
     }
   });
 

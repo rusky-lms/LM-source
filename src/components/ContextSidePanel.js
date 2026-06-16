@@ -741,17 +741,18 @@ function wireEvents(panel, ctx) {
     });
   });
 
-  // Open target platform
-  const platformUrls = {
-    '#lms-open-claude':   'https://claude.ai/new',
-    '#lms-open-chatgpt':  'https://chatgpt.com/',
-    '#lms-open-gemini':   'https://gemini.google.com/',
+  // Open target platform and deliver handoff prompt
+  const handoffTargets = {
+    '#lms-open-claude':   'claude',
+    '#lms-open-chatgpt':  'chatgpt',
+    '#lms-open-gemini':   'gemini',
   };
-  for (const [selector, url] of Object.entries(platformUrls)) {
+  for (const [selector, targetPlatform] of Object.entries(handoffTargets)) {
     panel.querySelector(selector)?.addEventListener('click', () => {
       chrome.runtime.sendMessage({
-        type: 'LMS_OPEN_URL',
-        url,
+        type: 'LMS_DELIVER_HANDOFF_NEW_TAB',
+        targetPlatform,
+        prompt: ctx.handoffPrompt
       });
     });
   }
