@@ -28,6 +28,8 @@ const CHAT_CONTAINER_SELECTORS = [
   '[role="main"]',
   // Angular app root, very broad — last resort
   'main',
+  'app-root',
+  'body'
 ];
 
 // Individual conversation turn wrappers
@@ -39,6 +41,9 @@ const MESSAGE_TURN_SELECTORS = [
   '[role="listitem"]',
   // Class fragment hints (obfuscated but historically present)
   '[class*="conversation-turn"]',
+  // Very generic fallback
+  'div[class*="message-"]',
+  'div[class*="messageWrapper"]'
 ];
 
 // The element inside a turn that holds the user's text

@@ -124,8 +124,12 @@
     // Fallback: known Claude scroll wrappers
     'main [class*="overflow-y-auto"]',
     'main [class*="scroll"]',
+    '[class*="overflow-y-auto"]',
+    '[class*="scroll"]',
     // Last resort
-    "main"
+    "main",
+    'div[class*="flex-1"]',
+    "body"
   ];
   const USER_TURN_SIGNALS = [
     '[data-testid="human-turn"]',
@@ -380,7 +384,9 @@
     // Fallback: ARIA landmark
     '[role="main"]',
     // Angular app root, very broad — last resort
-    "main"
+    "main",
+    "app-root",
+    "body"
   ];
   const RESPONSE_TEXT_SELECTORS = [
     "message-content",
@@ -4436,6 +4442,11 @@
     }
     if ((request == null ? void 0 : request.type) === "LMS_OPEN_PINBOARD") {
       PinboardPanel.toggle();
+      sendResponse({ success: true });
+      return true;
+    }
+    if ((request == null ? void 0 : request.type) === "LMS_SHOW_HANDOFF_BANNER") {
+      HandoffBanner.showBanner();
       sendResponse({ success: true });
       return true;
     }

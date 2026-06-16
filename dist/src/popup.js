@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   handoffBtn.addEventListener("click", () => {
     if (activeTabId === null) return;
-    chrome.tabs.sendMessage(activeTabId, { type: "LMS_TOGGLE_PANEL" });
+    chrome.tabs.sendMessage(activeTabId, { type: "LMS_SHOW_HANDOFF_BANNER" });
     window.close();
   });
   let _showingDeleted = false;

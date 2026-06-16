@@ -188,6 +188,12 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true;
   }
 
+  if (request?.type === 'LMS_SHOW_HANDOFF_BANNER') {
+    HandoffBanner.showBanner();
+    sendResponse({ success: true });
+    return true;
+  }
+
   // P2.4 — Toggle show/hide deleted messages
   if (request?.type === 'LMS_TOGGLE_DELETED') {
     const nowVisible = !DeleteService.getDeletedVisible();
