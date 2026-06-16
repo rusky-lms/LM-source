@@ -2439,8 +2439,8 @@
       const copyBtn = e.target.closest(".copy-pin");
       if (copyBtn) {
         const pinId = copyBtn.dataset.pinId;
-        const card = panel.querySelector(`.lms-pb-card[data-pin-id="${pinId}"]`);
-        const fullText = ((_a2 = card == null ? void 0 : card.querySelector(".lms-pb-expand-btn")) == null ? void 0 : _a2.dataset.fullText) || ((_b2 = card == null ? void 0 : card.querySelector(".lms-pb-card-text")) == null ? void 0 : _b2.textContent) || "";
+        const card2 = panel.querySelector(`.lms-pb-card[data-pin-id="${pinId}"]`);
+        const fullText = ((_a2 = card2 == null ? void 0 : card2.querySelector(".lms-pb-expand-btn")) == null ? void 0 : _a2.dataset.fullText) || ((_b2 = card2 == null ? void 0 : card2.querySelector(".lms-pb-card-text")) == null ? void 0 : _b2.textContent) || "";
         navigator.clipboard.writeText(fullText.trim()).then(() => {
           copyBtn.textContent = "✅";
           setTimeout(() => {
@@ -2469,6 +2469,25 @@
             textEl.textContent = full.slice(0, 350) + (full.length > 350 ? "…" : "");
           }
           expandBtn.textContent = isExp ? "Show more ▾" : "Show less ▴";
+        }
+        return;
+      }
+      const card = e.target.closest(".lms-pb-card");
+      if (card && !e.target.closest("button")) {
+        const msgId = card.dataset.messageId;
+        if (msgId) {
+          const msgEl = document.querySelector(`[data-lms-msg-id="${msgId}"]`);
+          if (msgEl) {
+            msgEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            msgEl.style.transition = "box-shadow 0.3s ease";
+            const oldShadow = msgEl.style.boxShadow;
+            msgEl.style.boxShadow = "0 0 15px rgba(251, 191, 36, 0.5)";
+            setTimeout(() => {
+              msgEl.style.boxShadow = oldShadow;
+            }, 2e3);
+          } else {
+            console.warn("[LM-Source] Target message not found in DOM.");
+          }
         }
       }
     });
@@ -2993,6 +3012,11 @@
   border-radius: 3px;
 }
 
+[data-lms-edited-text] {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
 /* Inline edit widget overlay */
 .lms-edit-overlay {
   position: relative;
@@ -3506,13 +3530,14 @@
       padding: 0 2px;
       cursor: pointer;
       transition: opacity 0.2s;
+      color: inherit !important;
     }
     .lms-highlight:hover {
       opacity: 0.8;
     }
-    .lms-highlight-yellow { background-color: rgba(250, 204, 21, 0.4); border-bottom: 2px solid rgba(250, 204, 21, 0.8); }
-    .lms-highlight-green  { background-color: rgba(74, 222, 128, 0.4); border-bottom: 2px solid rgba(74, 222, 128, 0.8); }
-    .lms-highlight-red    { background-color: rgba(248, 113, 113, 0.4); border-bottom: 2px solid rgba(248, 113, 113, 0.8); }
+    .lms-highlight-yellow { background-color: rgba(250, 204, 21, 0.4) !important; border-bottom: 2px solid rgba(250, 204, 21, 0.8) !important; }
+    .lms-highlight-green  { background-color: rgba(74, 222, 128, 0.4) !important; border-bottom: 2px solid rgba(74, 222, 128, 0.8) !important; }
+    .lms-highlight-red    { background-color: rgba(248, 113, 113, 0.4) !important; border-bottom: 2px solid rgba(248, 113, 113, 0.8) !important; }
   `;
     document.head.appendChild(style);
   }

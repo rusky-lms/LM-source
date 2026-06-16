@@ -85,6 +85,11 @@ function ensureStyles() {
   border-radius: 3px;
 }
 
+[data-lms-edited-text] {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
 /* Inline edit widget overlay */
 .lms-edit-overlay {
   position: relative;

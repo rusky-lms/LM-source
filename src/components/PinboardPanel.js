@@ -499,9 +499,29 @@ function wireEvents(panel) {
         }
         expandBtn.textContent = isExp ? 'Show more ▾' : 'Show less ▴';
       }
+      return;
+    }
+
+    // Redirect / Scroll to message
+    const card = e.target.closest('.lms-pb-card');
+    if (card && !e.target.closest('button')) {
+      const msgId = card.dataset.messageId;
+      if (msgId) {
+        const msgEl = document.querySelector(`[data-lms-msg-id="${msgId}"]`);
+        if (msgEl) {
+          msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          msgEl.style.transition = 'box-shadow 0.3s ease';
+          const oldShadow = msgEl.style.boxShadow;
+          msgEl.style.boxShadow = '0 0 15px rgba(251, 191, 36, 0.5)';
+          setTimeout(() => { msgEl.style.boxShadow = oldShadow; }, 2000);
+        } else {
+          console.warn('[LM-Source] Target message not found in DOM.');
+        }
+      }
     }
   });
 
+  // Drag and drop
   wireDragDrop(panel);
 }
 
