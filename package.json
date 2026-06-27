@@ -8,6 +8,7 @@
     "zip": "npm run build && cd dist && zip -r ../lm-source-v1.1.0.zip . && echo 'Zipped: lm-source-v1.1.0.zip'"
   },
   "devDependencies": {
+    "sharp": "^0.35.1",
     "vite": "^6.0.0",
     "vite-plugin-web-extension": "^4.0.0"
   }

@@ -87,6 +87,18 @@ function buildStyles() {
   0%, 100% { transform: rotate(-8deg); }
   50%       { transform: rotate(8deg); }
 }
+
+/* Message highlight flash — uses !important to override host page CSS */
+@keyframes lms-pb-highlight-flash {
+  0%   { box-shadow: 0 0 0px rgba(251,191,36,0); background-color: transparent; }
+  20%  { box-shadow: 0 0 28px rgba(251,191,36,0.8) !important; background-color: rgba(251,191,36,0.22) !important; }
+  80%  { box-shadow: 0 0 28px rgba(251,191,36,0.6) !important; background-color: rgba(251,191,36,0.18) !important; }
+  100% { box-shadow: 0 0 0px rgba(251,191,36,0); background-color: transparent; }
+}
+.lms-pb-highlight {
+  animation: lms-pb-highlight-flash 2.5s ease forwards !important;
+  border-radius: 6px !important;
+}
 .lms-pb-close-btn {
   background: none;
   border: none;
@@ -499,9 +511,61 @@ function wireEvents(panel) {
         }
         expandBtn.textContent = isExp ? 'Show more ▾' : 'Show less ▴';
       }
+      return;
+    }
+
+    // Redirect / Scroll to message
+    const card = e.target.closest('.lms-pb-card');
+    if (card && !e.target.closest('button')) {
+      const msgId = card.dataset.messageId;
+      if (msgId) {
+        const msgEl = document.querySelector(`[data-lms-msg-id="${msgId}"]`);
+        if (msgEl) {
+          // Close the panel so the user can see the message
+          PinboardPanel.close();
+          
+          // Wait for the 300ms panel-close animation to finish, then scroll + highlight
+          setTimeout(() => {
+            // Find the nearest scrollable ancestor (SPAs like ChatGPT/Claude/Gemini
+            // embed the chat inside an inner overflow-scroll div, not the window).
+            const getScrollParent = (el) => {
+              let node = el.parentElement;
+              while (node) {
+                const style = window.getComputedStyle(node);
+                const overflow = style.overflow + style.overflowY;
+                if (/auto|scroll/.test(overflow) && node.scrollHeight > node.clientHeight) {
+                  return node;
+                }
+                node = node.parentElement;
+              }
+              return window;
+            };
+
+            const scroller = getScrollParent(msgEl);
+            const elRect   = msgEl.getBoundingClientRect();
+
+            if (scroller === window) {
+              window.scrollBy({ top: elRect.top - window.innerHeight / 2, behavior: 'smooth' });
+            } else {
+              const scrollerRect = scroller.getBoundingClientRect();
+              scroller.scrollBy({
+                top: elRect.top - scrollerRect.top - scroller.clientHeight / 2 + msgEl.offsetHeight / 2,
+                behavior: 'smooth',
+              });
+            }
+
+            // Use a CSS animation class with !important to override host page styles
+            msgEl.classList.add('lms-pb-highlight');
+            setTimeout(() => msgEl.classList.remove('lms-pb-highlight'), 2600);
+          }, 350);
+        } else {
+          console.warn('[LM-Source] Target message not found in DOM.');
+        }
+      }
     }
   });
 
+  // Drag and drop
   wireDragDrop(panel);
 }
 

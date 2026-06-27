@@ -426,10 +426,15 @@ function buildHandoffPrompt(ctx) {
  */
 function extractContext(adapter) {
   const elements = adapter.getMessageElements();
+  const platform = adapter.getPlatformIdentifier();
+  const conversationId = adapter.getConversationId();
 
   if (elements.length === 0) {
-    console.warn('[LM-Source][ContextExtractor] No message elements found.');
-    return null;
+    console.warn('[LM-Source][ContextExtractor] No message elements found. Returning empty context.');
+    return {
+      platform, conversationId, totalMessages: 0, userCount: 0, assistantCount: 0,
+      topics: [], decisions: [], nextSteps: [], codeBlocks: [], condensed: [], handoffPrompt: '', extractedAt: Date.now()
+    };
   }
 
   // Collect structured message data from adapter
@@ -439,12 +444,14 @@ function extractContext(adapter) {
     .filter(msg => msg.text && msg.text.trim()); // drop empty messages
 
   if (messages.length === 0) {
-    console.warn('[LM-Source][ContextExtractor] Messages found but text extraction yielded nothing.');
-    return null;
+    console.warn('[LM-Source][ContextExtractor] Messages found but text extraction yielded nothing. Returning empty context.');
+    return {
+      platform, conversationId, totalMessages: 0, userCount: 0, assistantCount: 0,
+      topics: [], decisions: [], nextSteps: [], codeBlocks: [], condensed: [], handoffPrompt: '', extractedAt: Date.now()
+    };
   }
 
-  const platform = adapter.getPlatformIdentifier();
-  const conversationId = adapter.getConversationId();
+
 
   const userCount = messages.filter(m => m.role === 'user').length;
   const assistantCount = messages.filter(m => m.role === 'assistant').length;

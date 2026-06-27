@@ -24,13 +24,14 @@ function ensureStyles() {
       padding: 0 2px;
       cursor: pointer;
       transition: opacity 0.2s;
+      color: inherit !important;
     }
     .lms-highlight:hover {
       opacity: 0.8;
     }
-    .lms-highlight-yellow { background-color: rgba(250, 204, 21, 0.4); border-bottom: 2px solid rgba(250, 204, 21, 0.8); }
-    .lms-highlight-green  { background-color: rgba(74, 222, 128, 0.4); border-bottom: 2px solid rgba(74, 222, 128, 0.8); }
-    .lms-highlight-red    { background-color: rgba(248, 113, 113, 0.4); border-bottom: 2px solid rgba(248, 113, 113, 0.8); }
+    .lms-highlight-yellow { background-color: rgba(250, 204, 21, 0.4) !important; border-bottom: 2px solid rgba(250, 204, 21, 0.8) !important; }
+    .lms-highlight-green  { background-color: rgba(74, 222, 128, 0.4) !important; border-bottom: 2px solid rgba(74, 222, 128, 0.8) !important; }
+    .lms-highlight-red    { background-color: rgba(248, 113, 113, 0.4) !important; border-bottom: 2px solid rgba(248, 113, 113, 0.8) !important; }
   `;
   document.head.appendChild(style);
 }

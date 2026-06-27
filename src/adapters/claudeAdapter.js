@@ -22,8 +22,12 @@ const CHAT_CONTAINER_SELECTORS = [
   // Fallback: known Claude scroll wrappers
   'main [class*="overflow-y-auto"]',
   'main [class*="scroll"]',
+  '[class*="overflow-y-auto"]',
+  '[class*="scroll"]',
   // Last resort
   'main',
+  'div[class*="flex-1"]',
+  'body'
 ];
 
 const MESSAGE_TURN_SELECTORS = [
@@ -39,6 +43,9 @@ const MESSAGE_TURN_SELECTORS = [
   '[class*="human-turn"]',
   '[class*="ai-turn"]',
   '[class*="ConversationItem"]',
+  // Last resort
+  '[class*="font-user"]',
+  '[class*="font-claude"]'
 ];
 
 // Selectors that, when present inside a turn, indicate it was authored by the user

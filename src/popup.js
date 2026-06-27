@@ -119,8 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   handoffBtn.addEventListener('click', () => {
     if (activeTabId === null) return;
-    // Toggle the panel on the page (useful when panel is already rendered)
-    chrome.tabs.sendMessage(activeTabId, { type: 'LMS_TOGGLE_PANEL' });
+    chrome.tabs.sendMessage(activeTabId, { type: 'LMS_SHOW_HANDOFF_BANNER' });
     window.close();
   });
 
